@@ -3,7 +3,7 @@ module github.com/complex64/protoc-gen-go-firestore
 go 1.19
 
 require (
-	github.com/complex64/protoc-gen-go-firestore/firestorepb v0.0.0-20221111122422-f78dc04b3852
+	github.com/complex64/protoc-gen-go-firestore/firestorepb v0.0.0-20221111124218-2ced56c4718b
 	github.com/google/go-cmp v0.5.9
 	github.com/stretchr/testify v1.8.1
 	google.golang.org/protobuf v1.28.1

@@ -1,0 +1,9 @@
+# Generates Go code for the test cases with .proto files.
+version: v1
+plugins:
+  - name: go
+    out: .
+    opt: paths=source_relative
+  - name: go-firestore
+    out: .
+    opt: paths=source_relative

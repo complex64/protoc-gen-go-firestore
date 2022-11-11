@@ -30,6 +30,7 @@ message ServiceOptions {/* Reserved */}
 message MethodOptions {/* Reserved */}
 
 message FileOptions {
+  bool enabled = 1;
 }
 
 message MessageOptions {
