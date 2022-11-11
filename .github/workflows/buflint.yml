@@ -1,0 +1,32 @@
+name: Buf Linter
+on:
+  push:
+    paths-ignore:
+      - '**.md'
+      - 'docs/mkdocs.yml'
+  pull_request:
+    paths-ignore:
+      - '**.md'
+      - 'docs/mkdocs.yml'
+jobs:
+  buf:
+    name: buf-lint-action
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: bufbuild/buf-setup-action@v1.6.0
+
+      # The main proto options definitions referenced by users.
+      - uses: bufbuild/buf-lint-action@v1
+        with:
+          input: proto
+
+      # Test cases for protoc-gen-go-firestore.
+      - uses: bufbuild/buf-lint-action@v1
+        with:
+          input: internal/gen/test
+
+      # Internal definitions used in tests.
+      - uses: bufbuild/buf-lint-action@v1
+        with:
+          input: internal/require
