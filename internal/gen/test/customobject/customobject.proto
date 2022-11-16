@@ -1,0 +1,9 @@
+syntax = "proto3";
+import "firestore/options.proto";
+package customobject;
+option go_package = "github.com/complex64/protoc-gen-go-firestore/cmd/protoc-gen-go-firestore/test/customobject";
+
+message City {
+  option (firestore.message) = {enabled: true};
+  string name = 1;
+}

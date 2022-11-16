@@ -1,9 +1,12 @@
 package gen
 
 import (
+	"fmt"
+
 	"github.com/complex64/protoc-gen-go-firestore/firestorepb"
 	"google.golang.org/protobuf/compiler/protogen"
 	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/types/descriptorpb"
 )
 
 func NewMessage(file *File, proto *protogen.Message) (*Message, error) {
@@ -72,15 +75,44 @@ func (m *Message) Gen() {
 	if !m.enabled() {
 		return
 	}
-	m.genConverters()
+	m.genCustomObjectStructType()
+	m.genConverterMethods()
 }
 
-// func (m *Message) deprecated() bool {
-// 	return m.proto.Desc.Options().(*descriptorpb.MessageOptions).GetDeprecated()
-// }
+func (m *Message) genCustomObjectStructType() {
+	m.Annotate(m.CustomObjectName(), m.proto.Location) // Message/document type declaration.
+	m.P(m.leadingComment(), "type ", m.CustomObjectName(), " struct {")
+	m.genFields()
+	m.P("}")
+	m.P()
+}
+
+func (m *Message) leadingComment() protogen.Comments {
+	return appendDeprecationNotice(
+		Comment(" %s is the Firestore Custom Object for %s.%s.",
+			m.CustomObjectName(),
+			m.file.proto.GoPackageName,
+			m.proto.GoIdent.GoName),
+		m.deprecated(),
+	)
+}
+
+func (m *Message) deprecated() bool {
+	return m.proto.Desc.Options().(*descriptorpb.MessageOptions).GetDeprecated()
+}
+
+func (m *Message) genFields() {
+	for _, field := range m.fields {
+		field.Gen()
+	}
+}
 
 func (m *Message) ProtoName() string {
 	return m.proto.GoIdent.GoName
+}
+
+func (m *Message) CustomObjectName() string {
+	return fmt.Sprintf("Firestore%s", m.ProtoName())
 }
 
 func (m *Message) enabled() bool { return m.opts.Enabled || m.file.Enabled() }

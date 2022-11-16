@@ -20,12 +20,12 @@ func Comment(format string, args ...interface{}) protogen.Comments {
 	return protogen.Comments(fmt.Sprintf(format, args...))
 }
 
-// func appendDeprecationNotice(prefix protogen.Comments, deprecated bool) protogen.Comments {
-// 	if !deprecated {
-// 		return prefix
-// 	}
-// 	if prefix != "" {
-// 		prefix += "\n"
-// 	}
-// 	return prefix + " Deprecated: Do not use.\n"
-// }
+func appendDeprecationNotice(prefix protogen.Comments, deprecated bool) protogen.Comments {
+	if !deprecated {
+		return prefix
+	}
+	if prefix != "" {
+		prefix += "\n"
+	}
+	return prefix + " Deprecated: Do not use.\n"
+}
