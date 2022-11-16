@@ -35,7 +35,13 @@ message FileOptions {
 
 message MessageOptions {
   bool enabled = 1;
+  string collection = 2;
 }
 
 message FieldOptions {
+  // Override the field name.
+  string name = 1;
+
+  // Exclude the field from Firestore I/O.
+  bool ignore = 2;
 }
