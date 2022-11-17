@@ -39,7 +39,7 @@ message MessageOptions {
 }
 
 message FieldOptions {
-  // Override the field name.
+  // Set an alternative name for the field.
   string name = 1;
 
   // Exclude the field from Firestore I/O.

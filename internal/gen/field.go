@@ -25,8 +25,8 @@ type Field struct {
 	msg   *Message
 	proto *protogen.Field
 
-	opts  *firestorepb.FieldOptions
-	types *FieldType
+	opts      *firestorepb.FieldOptions
+	fieldType *FieldType
 }
 
 func (f *Field) init() error {
@@ -48,19 +48,18 @@ func (f *Field) initOpts() {
 }
 
 func (f *Field) initTypes() error {
-	types, err := NewFieldType(f)
+	fieldType, err := NewFieldType(f)
 	if err != nil {
 		return err
 	}
-	f.types = types
+	f.fieldType = fieldType
 	return nil
 }
 
 func (f *Field) Gen() {
 	name := f.proto.GoName
-
 	f.Annotate(f.msg.CustomObjectName()+"."+name, f.proto.Location)
-	f.P(name, " ", f.types.String(), f.tags())
+	f.P(name, " ", f.fieldType.String(), f.tags())
 }
 
 func (f *Field) tags() string {
@@ -79,14 +78,20 @@ func (f *Field) tags() string {
 }
 
 func (f *Field) tagVals() (values []string) {
-	if f.opts == nil {
-		return
+	if f.opts.Ignore {
+		return []string{"-"}
+	}
+	if f.opts.ServerTimestamp {
+		return []string{"serverTimestamp"}
 	}
 	values = append(values, f.FirestoreFieldName()+",omitempty")
 	return
 }
 
 func (f *Field) FirestoreFieldName() string {
+	if f.opts.Name != "" {
+		return f.opts.Name
+	}
 	return f.proto.Desc.JSONName()
 }
 

@@ -75,19 +75,36 @@ func (m *Message) Gen() {
 	if !m.enabled() {
 		return
 	}
+	m.genCollectionNameConstant()
 	m.genCustomObjectStructType()
 	m.genConverterMethods()
 }
 
+func (m *Message) genCollectionNameConstant() {
+	m.Annotate(m.CollectionConstantName(), m.proto.Location)
+	m.P(m.leadingConstComment(), "const ", m.CollectionConstantName(), " = \"TODO\"")
+	m.P()
+}
+
+func (m *Message) leadingConstComment() protogen.Comments {
+	return appendDeprecationNotice(
+		Comment(" %s is the Firestore collection name for documents of type %s.%s.",
+			m.CollectionConstantName(),
+			m.file.proto.GoPackageName,
+			m.proto.GoIdent.GoName),
+		m.deprecated(),
+	)
+}
+
 func (m *Message) genCustomObjectStructType() {
 	m.Annotate(m.CustomObjectName(), m.proto.Location) // Message/document type declaration.
-	m.P(m.leadingComment(), "type ", m.CustomObjectName(), " struct {")
+	m.P(m.leadingStructComment(), "type ", m.CustomObjectName(), " struct {")
 	m.genFields()
 	m.P("}")
 	m.P()
 }
 
-func (m *Message) leadingComment() protogen.Comments {
+func (m *Message) leadingStructComment() protogen.Comments {
 	return appendDeprecationNotice(
 		Comment(" %s is the Firestore Custom Object for %s.%s.",
 			m.CustomObjectName(),
@@ -115,7 +132,18 @@ func (m *Message) CustomObjectName() string {
 	return fmt.Sprintf("Firestore%s", m.ProtoName())
 }
 
-func (m *Message) enabled() bool { return m.opts.Enabled || m.file.Enabled() }
+func (m *Message) CollectionConstantName() string {
+	return fmt.Sprintf("Firestore%sCollection", m.ProtoName())
+}
 
-func (m *Message) Annotate(symbol string, loc protogen.Location) { m.file.Annotate(symbol, loc) }
-func (m *Message) P(v ...interface{})                            { m.file.P(v...) }
+func (m *Message) enabled() bool {
+	return m.opts.Enabled || m.file.Enabled()
+}
+
+func (m *Message) Annotate(symbol string, loc protogen.Location) {
+	m.file.Annotate(symbol, loc)
+}
+
+func (m *Message) P(v ...interface{}) {
+	m.file.P(v...)
+}

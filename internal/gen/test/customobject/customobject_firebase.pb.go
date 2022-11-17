@@ -8,23 +8,40 @@ package customobject
 
 import (
 	_ "github.com/complex64/protoc-gen-go-firestore/firestorepb"
+	_ "google.golang.org/protobuf/types/known/timestamppb"
+	time "time"
 )
+
+// FirestoreCityCollection is the Firestore collection name for documents of type customobject.City.
+const FirestoreCityCollection = "TODO"
 
 // FirestoreCity is the Firestore Custom Object for customobject.City.
 type FirestoreCity struct {
-	Name string `firestore:"name,omitempty"`
-}
-
-// ToProto converts a FirestoreCity to its protobuf representation.
-func (m *FirestoreCity) ToProto() (*City, error) {
-	x := new(City)
-	x.Name = m.Name
-	return x, nil
-}
-
-// ToFirestore returns the Firestore Custom Object for City.
-func (x *City) ToFirestore() (*FirestoreCity, error) {
-	m := new(FirestoreCity)
-	m.Name = x.Name
-	return m, nil
+	StringField            string      `firestore:"stringField,omitempty"`
+	RepeatedStringField    []string    `firestore:"repeatedStringField,omitempty"`
+	BoolField              bool        `firestore:"boolField,omitempty"`
+	RepeatedBoolField      []bool      `firestore:"repeatedBoolField,omitempty"`
+	BytesField             []byte      `firestore:"bytesField,omitempty"`
+	RepeatedBytesField     [][]byte    `firestore:"repeatedBytesField,omitempty"`
+	Int32Field             int32       `firestore:"int32Field,omitempty"`
+	RepeatedInt32Field     []int32     `firestore:"repeatedInt32Field,omitempty"`
+	Int64Field             int64       `firestore:"int64Field,omitempty"`
+	RepeatedInt64Field     []int64     `firestore:"repeatedInt64Field,omitempty"`
+	Uint32Field            uint32      `firestore:"uint32Field,omitempty"`
+	RepeatedUint32Field    []uint32    `firestore:"repeatedUint32Field,omitempty"`
+	Uint64Field            uint64      `firestore:"uint64Field,omitempty"`
+	RepeatedUint64Field    []uint64    `firestore:"repeatedUint64Field,omitempty"`
+	Sint32Field            int32       `firestore:"sint32Field,omitempty"`
+	RepeatedSint32Field    []int32     `firestore:"repeatedSint32Field,omitempty"`
+	Sint64Field            int64       `firestore:"sint64Field,omitempty"`
+	RepeatedSint64Field    []int64     `firestore:"repeatedSint64Field,omitempty"`
+	FloatField             float32     `firestore:"floatField,omitempty"`
+	RepeatedFloatField     []float32   `firestore:"repeatedFloatField,omitempty"`
+	DoubleField            float64     `firestore:"doubleField,omitempty"`
+	RepeatedDoubleField    []float64   `firestore:"repeatedDoubleField,omitempty"`
+	TimestampField         time.Time   `firestore:"timestampField,omitempty"`
+	RepeatedTimestampField []time.Time `firestore:"repeatedTimestampField,omitempty"`
+	NamedStringField       string      `firestore:"custom_name,omitempty"`
+	IgnoredStringField     string      `firestore:"-"`
+	ServerTimestampField   time.Time   `firestore:"serverTimestamp"`
 }

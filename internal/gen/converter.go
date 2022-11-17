@@ -6,8 +6,8 @@ import (
 )
 
 func (m *Message) genConverterMethods() {
-	m.genToProtoMethod()
-	m.genToFirestoreMethod()
+	// m.genToProtoMethod()
+	// m.genToFirestoreMethod()
 }
 
 func (m *Message) genToProtoMethod() {
@@ -28,30 +28,16 @@ func (m *Message) genModelToProtoFields() {
 
 func (f *Field) genConvertToProto() {
 	switch {
-	// case f.types.JSON:
-	// 	f.genConvertJsonToProto()
-	case f.types.Enum:
+	case f.fieldType.IsEnum:
 		f.genEnumToProto()
-	case f.types.isTimestamp():
+	case f.fieldType.isTimestamp():
 		f.genConvertTimeToProto()
-	case f.types.Pointer:
+	case f.fieldType.IsPointer:
 		f.P("x.", f.Name(), " = *m.", f.Name())
 	default:
 		f.P("x.", f.Name(), " = m.", f.Name())
 	}
 }
-
-// func (f *Field) genConvertJsonToProto() {
-// 	unmarshal := f.msg.file.out.QualifiedGoIdent(protogen.GoIdent{
-// 		GoName:       "Unmarshal",
-// 		GoImportPath: "encoding/json",
-// 	})
-// 	f.P("if len(m.", f.Name(), ") > 0 {")
-// 	f.P("if err := ", unmarshal, "(m.", f.Name(), ", &x.", f.Name(), "); err != nil {")
-// 	f.P("return nil, err")
-// 	f.P("}")
-// 	f.P("}")
-// }
 
 func (f *Field) genConvertTimeToProto() {
 	newTimestamp := f.msg.file.out.QualifiedGoIdent(protogen.GoIdent{
@@ -90,30 +76,16 @@ func (m *Message) genConvertToFirestoreFields() {
 
 func (f *Field) genConvertToFirestore() {
 	switch {
-	// case f.types.JSON:
-	// 	f.genConvertJsonToFirestore()
-	case f.types.Enum:
+	case f.fieldType.IsEnum:
 		f.genEnumToFirestore()
-	case f.types.isTimestamp():
+	case f.fieldType.isTimestamp():
 		f.genConvertTimestampToFirestore()
-	case f.types.Pointer:
+	case f.fieldType.IsPointer:
 		f.P("m.", f.Name(), " = *x.", f.Name())
 	default:
 		f.P("m.", f.Name(), " = x.", f.Name())
 	}
 }
-
-// func (f *Field) genConvertJsonToFirestore() {
-// 	marshal := f.msg.file.out.QualifiedGoIdent(protogen.GoIdent{
-// 		GoName:       "Marshal",
-// 		GoImportPath: "encoding/json",
-// 	})
-// 	f.P("if bs, err := ", marshal, "(&x.", f.Name(), "); err != nil {")
-// 	f.P("return nil, err")
-// 	f.P("} else {")
-// 	f.P("m.", f.Name(), " = bs")
-// 	f.P("}") // if
-// }
 
 func (f *Field) genEnumToFirestore() {
 	f.P("m.", f.Name(), " = ", "int32(x.", f.Name(), ")")
