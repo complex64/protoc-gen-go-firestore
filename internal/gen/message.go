@@ -75,26 +75,26 @@ func (m *Message) Gen() {
 	if !m.enabled() {
 		return
 	}
-	m.genCollectionNameConstant()
+	// m.genCollectionNameConstant()
 	m.genCustomObjectStructType()
 	m.genConverterMethods()
 }
 
-func (m *Message) genCollectionNameConstant() {
-	m.Annotate(m.CollectionConstantName(), m.proto.Location)
-	m.P(m.leadingConstComment(), "const ", m.CollectionConstantName(), " = \"TODO\"")
-	m.P()
-}
+// func (m *Message) genCollectionNameConstant() {
+// 	m.Annotate(m.CollectionConstantName(), m.proto.Location)
+// 	m.P(m.leadingConstComment(), "const ", m.CollectionConstantName(), " = \"TODO\"")
+// 	m.P()
+// }
 
-func (m *Message) leadingConstComment() protogen.Comments {
-	return appendDeprecationNotice(
-		Comment(" %s is the Firestore collection name for documents of type %s.%s.",
-			m.CollectionConstantName(),
-			m.file.proto.GoPackageName,
-			m.proto.GoIdent.GoName),
-		m.deprecated(),
-	)
-}
+// func (m *Message) leadingConstComment() protogen.Comments {
+// 	return appendDeprecationNotice(
+// 		Comment(" %s is the Firestore collection name for documents of type %s.%s.",
+// 			m.CollectionConstantName(),
+// 			m.file.proto.GoPackageName,
+// 			m.proto.GoIdent.GoName),
+// 		m.deprecated(),
+// 	)
+// }
 
 func (m *Message) genCustomObjectStructType() {
 	m.Annotate(m.CustomObjectName(), m.proto.Location) // Message/document type declaration.

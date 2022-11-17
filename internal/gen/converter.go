@@ -6,12 +6,12 @@ import (
 )
 
 func (m *Message) genConverterMethods() {
-	// m.genToProtoMethod()
-	// m.genToFirestoreMethod()
+	m.genToProtoMethod()
+	m.genToFirestoreMethod()
 }
 
 func (m *Message) genToProtoMethod() {
-	m.P(Comment(" ToProto converts a %s to its protobuf representation.", m.CustomObjectName()),
+	m.P(Comment(" ToProto converts this %s to its protobuf representation.", m.CustomObjectName()),
 		"func (m *", m.CustomObjectName(), ") ToProto() (*", m.proto.GoIdent.GoName, ", error) {")
 	m.P("x := new(", m.proto.GoIdent.GoName, ")")
 	m.genModelToProtoFields()
@@ -33,20 +33,44 @@ func (f *Field) genConvertToProto() {
 	case f.fieldType.isTimestamp():
 		f.genConvertTimeToProto()
 	case f.fieldType.IsPointer:
-		f.P("x.", f.Name(), " = *m.", f.Name())
+		f.genConvertPointerField()
 	default:
-		f.P("x.", f.Name(), " = m.", f.Name())
+		f.genConvertDefaultField()
 	}
 }
 
+func (f *Field) genConvertPointerField() {
+	f.P("x.", f.Name(), " = *m.", f.Name())
+}
+
+func (f *Field) genConvertDefaultField() {
+	f.P("x.", f.Name(), " = m.", f.Name())
+}
+
 func (f *Field) genConvertTimeToProto() {
+	tsType := f.msg.file.out.QualifiedGoIdent(protogen.GoIdent{
+		GoName:       "Timestamp",
+		GoImportPath: "google.golang.org/protobuf/types/known/timestamppb",
+	})
 	newTimestamp := f.msg.file.out.QualifiedGoIdent(protogen.GoIdent{
 		GoName:       "New",
 		GoImportPath: "google.golang.org/protobuf/types/known/timestamppb",
 	})
-	f.P("if m.", f.Name(), " != (time.Time{}) {")
-	f.P("x.", f.Name(), " = ", newTimestamp, "(m.", f.Name(), ")")
-	f.P("}")
+	if f.fieldType.IsList {
+		f.P("{")
+		f.P("l := len(m.", f.Name(), ")")
+		f.P("x.", f.Name(), " = make([]*", tsType, ", l)")
+		f.P("for i:=0; i < l; i++ {")
+		f.P("if m.", f.Name(), "[i] != (time.Time{}) {")
+		f.P("x.", f.Name(), "[i] = ", newTimestamp, "(m.", f.Name(), "[i])")
+		f.P("}") // if
+		f.P("}") // for
+		f.P("}")
+	} else {
+		f.P("if m.", f.Name(), " != (time.Time{}) {")
+		f.P("x.", f.Name(), " = ", newTimestamp, "(m.", f.Name(), ")")
+		f.P("}")
+	}
 }
 
 func (f *Field) genEnumToProto() {
@@ -92,7 +116,23 @@ func (f *Field) genEnumToFirestore() {
 }
 
 func (f *Field) genConvertTimestampToFirestore() {
-	f.P("if t := x.", f.Name(), "; t != nil {")
-	f.P("m.", f.Name(), " = t.AsTime()")
-	f.P("}")
+	tt := f.msg.file.out.QualifiedGoIdent(protogen.GoIdent{
+		GoName:       "Time",
+		GoImportPath: "time",
+	})
+	if f.fieldType.IsList {
+		f.P("{")
+		f.P("l := len(x.", f.Name(), ")")
+		f.P("m.", f.Name(), " = make([]", tt, ", l)")
+		f.P("for i:=0; i < l; i++ {")
+		f.P("if x.", f.Name(), "[i] != nil {")
+		f.P("m.", f.Name(), "[i] = x.", f.Name(), "[i].AsTime()")
+		f.P("}") // if
+		f.P("}") // for
+		f.P("}")
+	} else {
+		f.P("if t := x.", f.Name(), "; t != nil {")
+		f.P("m.", f.Name(), " = t.AsTime()")
+		f.P("}")
+	}
 }

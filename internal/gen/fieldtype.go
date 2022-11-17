@@ -50,7 +50,7 @@ func (t *FieldType) init() error {
 	case protoreflect.Int64Kind, protoreflect.Sint64Kind, protoreflect.Sfixed64Kind:
 		t.Firestore.GoName = "int64"
 	case protoreflect.Uint64Kind, protoreflect.Fixed64Kind:
-		t.Firestore.GoName = "int64"
+		panic(fmt.Sprintf("UNSUPPORTED: uint64|fixed64: %+v", t.Go))
 	case protoreflect.FloatKind:
 		t.Firestore.GoName = "float32"
 	case protoreflect.DoubleKind:

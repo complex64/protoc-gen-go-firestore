@@ -2,9 +2,9 @@
 // versions:
 // 	protoc-gen-go-firestore v0.0.0
 // 	protoc          (unknown)
-// source: customobject/customobject.proto
+// source: converter/converter.proto
 
-package customobject
+package converter
 
 import (
 	_ "github.com/complex64/protoc-gen-go-firestore/firestorepb"
@@ -12,61 +12,58 @@ import (
 	time "time"
 )
 
-// FirestoreCity is the Firestore Custom Object for customobject.City.
+// FirestoreCity is the Firestore Custom Object for converter.City.
 type FirestoreCity struct {
 	StringField            string      `firestore:"stringField,omitempty"`
-	RepeatedStringField    []string    `firestore:"repeatedStringField,omitempty"`
 	BoolField              bool        `firestore:"boolField,omitempty"`
-	RepeatedBoolField      []bool      `firestore:"repeatedBoolField,omitempty"`
 	BytesField             []byte      `firestore:"bytesField,omitempty"`
-	RepeatedBytesField     [][]byte    `firestore:"repeatedBytesField,omitempty"`
 	Int32Field             int32       `firestore:"int32Field,omitempty"`
-	RepeatedInt32Field     []int32     `firestore:"repeatedInt32Field,omitempty"`
 	Int64Field             int64       `firestore:"int64Field,omitempty"`
-	RepeatedInt64Field     []int64     `firestore:"repeatedInt64Field,omitempty"`
 	Uint32Field            uint32      `firestore:"uint32Field,omitempty"`
-	RepeatedUint32Field    []uint32    `firestore:"repeatedUint32Field,omitempty"`
 	Sint32Field            int32       `firestore:"sint32Field,omitempty"`
-	RepeatedSint32Field    []int32     `firestore:"repeatedSint32Field,omitempty"`
 	Sint64Field            int64       `firestore:"sint64Field,omitempty"`
-	RepeatedSint64Field    []int64     `firestore:"repeatedSint64Field,omitempty"`
 	FloatField             float32     `firestore:"floatField,omitempty"`
-	RepeatedFloatField     []float32   `firestore:"repeatedFloatField,omitempty"`
 	DoubleField            float64     `firestore:"doubleField,omitempty"`
-	RepeatedDoubleField    []float64   `firestore:"repeatedDoubleField,omitempty"`
 	TimestampField         time.Time   `firestore:"timestampField,omitempty"`
+	RepeatedStringField    []string    `firestore:"repeatedStringField,omitempty"`
+	RepeatedBoolField      []bool      `firestore:"repeatedBoolField,omitempty"`
+	RepeatedBytesField     [][]byte    `firestore:"repeatedBytesField,omitempty"`
+	RepeatedInt32Field     []int32     `firestore:"repeatedInt32Field,omitempty"`
+	RepeatedInt64Field     []int64     `firestore:"repeatedInt64Field,omitempty"`
+	RepeatedUint32Field    []uint32    `firestore:"repeatedUint32Field,omitempty"`
+	RepeatedSint32Field    []int32     `firestore:"repeatedSint32Field,omitempty"`
+	RepeatedSint64Field    []int64     `firestore:"repeatedSint64Field,omitempty"`
+	RepeatedFloatField     []float32   `firestore:"repeatedFloatField,omitempty"`
+	RepeatedDoubleField    []float64   `firestore:"repeatedDoubleField,omitempty"`
 	RepeatedTimestampField []time.Time `firestore:"repeatedTimestampField,omitempty"`
-	NamedStringField       string      `firestore:"custom_name,omitempty"`
-	IgnoredStringField     string      `firestore:"-"`
-	ServerTimestampField   time.Time   `firestore:"serverTimestamp"`
 }
 
 // ToProto converts this FirestoreCity to its protobuf representation.
 func (m *FirestoreCity) ToProto() (*City, error) {
 	x := new(City)
 	x.StringField = m.StringField
-	x.RepeatedStringField = m.RepeatedStringField
 	x.BoolField = m.BoolField
-	x.RepeatedBoolField = m.RepeatedBoolField
 	x.BytesField = m.BytesField
-	x.RepeatedBytesField = m.RepeatedBytesField
 	x.Int32Field = m.Int32Field
-	x.RepeatedInt32Field = m.RepeatedInt32Field
 	x.Int64Field = m.Int64Field
-	x.RepeatedInt64Field = m.RepeatedInt64Field
 	x.Uint32Field = m.Uint32Field
-	x.RepeatedUint32Field = m.RepeatedUint32Field
 	x.Sint32Field = m.Sint32Field
-	x.RepeatedSint32Field = m.RepeatedSint32Field
 	x.Sint64Field = m.Sint64Field
-	x.RepeatedSint64Field = m.RepeatedSint64Field
 	x.FloatField = m.FloatField
-	x.RepeatedFloatField = m.RepeatedFloatField
 	x.DoubleField = m.DoubleField
-	x.RepeatedDoubleField = m.RepeatedDoubleField
 	if m.TimestampField != (time.Time{}) {
 		x.TimestampField = timestamppb.New(m.TimestampField)
 	}
+	x.RepeatedStringField = m.RepeatedStringField
+	x.RepeatedBoolField = m.RepeatedBoolField
+	x.RepeatedBytesField = m.RepeatedBytesField
+	x.RepeatedInt32Field = m.RepeatedInt32Field
+	x.RepeatedInt64Field = m.RepeatedInt64Field
+	x.RepeatedUint32Field = m.RepeatedUint32Field
+	x.RepeatedSint32Field = m.RepeatedSint32Field
+	x.RepeatedSint64Field = m.RepeatedSint64Field
+	x.RepeatedFloatField = m.RepeatedFloatField
+	x.RepeatedDoubleField = m.RepeatedDoubleField
 	{
 		l := len(m.RepeatedTimestampField)
 		x.RepeatedTimestampField = make([]*timestamppb.Timestamp, l)
@@ -76,11 +73,6 @@ func (m *FirestoreCity) ToProto() (*City, error) {
 			}
 		}
 	}
-	x.NamedStringField = m.NamedStringField
-	x.IgnoredStringField = m.IgnoredStringField
-	if m.ServerTimestampField != (time.Time{}) {
-		x.ServerTimestampField = timestamppb.New(m.ServerTimestampField)
-	}
 	return x, nil
 }
 
@@ -88,28 +80,28 @@ func (m *FirestoreCity) ToProto() (*City, error) {
 func (x *City) ToFirestore() (*FirestoreCity, error) {
 	m := new(FirestoreCity)
 	m.StringField = x.StringField
-	m.RepeatedStringField = x.RepeatedStringField
 	m.BoolField = x.BoolField
-	m.RepeatedBoolField = x.RepeatedBoolField
 	m.BytesField = x.BytesField
-	m.RepeatedBytesField = x.RepeatedBytesField
 	m.Int32Field = x.Int32Field
-	m.RepeatedInt32Field = x.RepeatedInt32Field
 	m.Int64Field = x.Int64Field
-	m.RepeatedInt64Field = x.RepeatedInt64Field
 	m.Uint32Field = x.Uint32Field
-	m.RepeatedUint32Field = x.RepeatedUint32Field
 	m.Sint32Field = x.Sint32Field
-	m.RepeatedSint32Field = x.RepeatedSint32Field
 	m.Sint64Field = x.Sint64Field
-	m.RepeatedSint64Field = x.RepeatedSint64Field
 	m.FloatField = x.FloatField
-	m.RepeatedFloatField = x.RepeatedFloatField
 	m.DoubleField = x.DoubleField
-	m.RepeatedDoubleField = x.RepeatedDoubleField
 	if t := x.TimestampField; t != nil {
 		m.TimestampField = t.AsTime()
 	}
+	m.RepeatedStringField = x.RepeatedStringField
+	m.RepeatedBoolField = x.RepeatedBoolField
+	m.RepeatedBytesField = x.RepeatedBytesField
+	m.RepeatedInt32Field = x.RepeatedInt32Field
+	m.RepeatedInt64Field = x.RepeatedInt64Field
+	m.RepeatedUint32Field = x.RepeatedUint32Field
+	m.RepeatedSint32Field = x.RepeatedSint32Field
+	m.RepeatedSint64Field = x.RepeatedSint64Field
+	m.RepeatedFloatField = x.RepeatedFloatField
+	m.RepeatedDoubleField = x.RepeatedDoubleField
 	{
 		l := len(x.RepeatedTimestampField)
 		m.RepeatedTimestampField = make([]time.Time, l)
@@ -118,11 +110,6 @@ func (x *City) ToFirestore() (*FirestoreCity, error) {
 				m.RepeatedTimestampField[i] = x.RepeatedTimestampField[i].AsTime()
 			}
 		}
-	}
-	m.NamedStringField = x.NamedStringField
-	m.IgnoredStringField = x.IgnoredStringField
-	if t := x.ServerTimestampField; t != nil {
-		m.ServerTimestampField = t.AsTime()
 	}
 	return m, nil
 }
