@@ -5,6 +5,7 @@ import (
 
 	"github.com/complex64/protoc-gen-go-firestore/firestorepb"
 	"github.com/complex64/protoc-gen-go-firestore/internal/version"
+	"github.com/rs/zerolog/log"
 	"google.golang.org/protobuf/compiler/protogen"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/reflect/protoreflect"
@@ -15,6 +16,7 @@ func NewFile(plugin *protogen.Plugin, proto *protogen.File) (*File, error) {
 		plugin: plugin,
 		proto:  proto,
 		msgs:   map[string]*Message{},
+		nested: map[string]any{},
 	}
 	if err := file.init(); err != nil {
 		return nil, err
@@ -30,6 +32,8 @@ type File struct {
 	out  *protogen.GeneratedFile
 	opts *firestorepb.FileOptions
 	msgs map[string]*Message
+
+	nested map[string]any
 }
 
 func (f *File) init() error {
@@ -84,6 +88,7 @@ func (f *File) initMsg(proto *protogen.Message) error {
 }
 
 func (f *File) Gen() {
+	log.Trace().Str("file", f.proto.Desc.Path()).Msg("(f *File).Gen()")
 	f.genHeader()
 	f.genPackage()
 	f.genImports()

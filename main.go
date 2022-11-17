@@ -8,6 +8,8 @@ import (
 
 	"github.com/complex64/protoc-gen-go-firestore/internal/gen"
 	"github.com/complex64/protoc-gen-go-firestore/internal/version"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 	"google.golang.org/protobuf/compiler/protogen"
 )
 
@@ -21,6 +23,9 @@ var (
 )
 
 func main() {
+	zerolog.SetGlobalLevel(zerolog.TraceLevel)
+	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr}).With().Caller().Logger()
+
 	flag.Parse()
 	if *showVersion {
 		fmt.Fprintf(os.Stdout, "%v %v\n", filepath.Base(os.Args[0]), version.String())

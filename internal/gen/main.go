@@ -4,10 +4,14 @@ import (
 	"flag"
 	"fmt"
 
+	"github.com/rs/zerolog/log"
 	"google.golang.org/protobuf/compiler/protogen"
 )
 
 func GenerateFile(fs flag.FlagSet, plugin *protogen.Plugin, proto *protogen.File) error {
+	log.Trace().Str("file", proto.Desc.Path()).Msg("GenerateFile()")
+	defer log.Trace().Msg("-----------------------------------------------------------------------")
+
 	file, err := NewFile(plugin, proto)
 	if err != nil {
 		return err

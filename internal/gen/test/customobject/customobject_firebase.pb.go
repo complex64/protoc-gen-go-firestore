@@ -14,31 +14,33 @@ import (
 
 // FirestoreCity is the Firestore Custom Object for customobject.City.
 type FirestoreCity struct {
-	StringField            string      `firestore:"stringField,omitempty"`
-	RepeatedStringField    []string    `firestore:"repeatedStringField,omitempty"`
-	BoolField              bool        `firestore:"boolField,omitempty"`
-	RepeatedBoolField      []bool      `firestore:"repeatedBoolField,omitempty"`
-	BytesField             []byte      `firestore:"bytesField,omitempty"`
-	RepeatedBytesField     [][]byte    `firestore:"repeatedBytesField,omitempty"`
-	Int32Field             int32       `firestore:"int32Field,omitempty"`
-	RepeatedInt32Field     []int32     `firestore:"repeatedInt32Field,omitempty"`
-	Int64Field             int64       `firestore:"int64Field,omitempty"`
-	RepeatedInt64Field     []int64     `firestore:"repeatedInt64Field,omitempty"`
-	Uint32Field            uint32      `firestore:"uint32Field,omitempty"`
-	RepeatedUint32Field    []uint32    `firestore:"repeatedUint32Field,omitempty"`
-	Sint32Field            int32       `firestore:"sint32Field,omitempty"`
-	RepeatedSint32Field    []int32     `firestore:"repeatedSint32Field,omitempty"`
-	Sint64Field            int64       `firestore:"sint64Field,omitempty"`
-	RepeatedSint64Field    []int64     `firestore:"repeatedSint64Field,omitempty"`
-	FloatField             float32     `firestore:"floatField,omitempty"`
-	RepeatedFloatField     []float32   `firestore:"repeatedFloatField,omitempty"`
-	DoubleField            float64     `firestore:"doubleField,omitempty"`
-	RepeatedDoubleField    []float64   `firestore:"repeatedDoubleField,omitempty"`
-	TimestampField         time.Time   `firestore:"timestampField,omitempty"`
-	RepeatedTimestampField []time.Time `firestore:"repeatedTimestampField,omitempty"`
-	NamedStringField       string      `firestore:"custom_name,omitempty"`
-	IgnoredStringField     string      `firestore:"-"`
-	ServerTimestampField   time.Time   `firestore:"serverTimestamp"`
+	StringField            string                         `firestore:"stringField,omitempty"`
+	RepeatedStringField    []string                       `firestore:"repeatedStringField,omitempty"`
+	BoolField              bool                           `firestore:"boolField,omitempty"`
+	RepeatedBoolField      []bool                         `firestore:"repeatedBoolField,omitempty"`
+	BytesField             []byte                         `firestore:"bytesField,omitempty"`
+	RepeatedBytesField     [][]byte                       `firestore:"repeatedBytesField,omitempty"`
+	Int32Field             int32                          `firestore:"int32Field,omitempty"`
+	RepeatedInt32Field     []int32                        `firestore:"repeatedInt32Field,omitempty"`
+	Int64Field             int64                          `firestore:"int64Field,omitempty"`
+	RepeatedInt64Field     []int64                        `firestore:"repeatedInt64Field,omitempty"`
+	Uint32Field            uint32                         `firestore:"uint32Field,omitempty"`
+	RepeatedUint32Field    []uint32                       `firestore:"repeatedUint32Field,omitempty"`
+	Sint32Field            int32                          `firestore:"sint32Field,omitempty"`
+	RepeatedSint32Field    []int32                        `firestore:"repeatedSint32Field,omitempty"`
+	Sint64Field            int64                          `firestore:"sint64Field,omitempty"`
+	RepeatedSint64Field    []int64                        `firestore:"repeatedSint64Field,omitempty"`
+	FloatField             float32                        `firestore:"floatField,omitempty"`
+	RepeatedFloatField     []float32                      `firestore:"repeatedFloatField,omitempty"`
+	DoubleField            float64                        `firestore:"doubleField,omitempty"`
+	RepeatedDoubleField    []float64                      `firestore:"repeatedDoubleField,omitempty"`
+	TimestampField         time.Time                      `firestore:"timestampField,omitempty"`
+	RepeatedTimestampField []time.Time                    `firestore:"repeatedTimestampField,omitempty"`
+	NamedStringField       string                         `firestore:"custom_name,omitempty"`
+	IgnoredStringField     string                         `firestore:"-"`
+	ServerTimestampField   time.Time                      `firestore:"serverTimestamp"`
+	Mayor                  *FirestoreMayor                `firestore:"mayor,omitempty"`
+	MyNestedField          *FirestoreCity_MyNestedMessage `firestore:"myNestedField,omitempty"`
 }
 
 // ToProto converts this FirestoreCity to its protobuf representation.
@@ -80,6 +82,16 @@ func (m *FirestoreCity) ToProto() (*City, error) {
 	x.IgnoredStringField = m.IgnoredStringField
 	if m.ServerTimestampField != (time.Time{}) {
 		x.ServerTimestampField = timestamppb.New(m.ServerTimestampField)
+	}
+	if c, err := m.Mayor.ToProto(); err != nil {
+		return nil, err
+	} else {
+		x.Mayor = c
+	}
+	if c, err := m.MyNestedField.ToProto(); err != nil {
+		return nil, err
+	} else {
+		x.MyNestedField = c
 	}
 	return x, nil
 }
@@ -124,5 +136,83 @@ func (x *City) ToFirestore() (*FirestoreCity, error) {
 	if t := x.ServerTimestampField; t != nil {
 		m.ServerTimestampField = t.AsTime()
 	}
+	if c, err := x.Mayor.ToFirestore(); err != nil {
+		return nil, err
+	} else {
+		m.Mayor = c
+	}
+	if c, err := x.MyNestedField.ToFirestore(); err != nil {
+		return nil, err
+	} else {
+		m.MyNestedField = c
+	}
+	return m, nil
+}
+
+// FirestoreCity_MyNestedMessage is the Firestore Custom Object for customobject.City_MyNestedMessage.
+type FirestoreCity_MyNestedMessage struct {
+	Name string `firestore:"name,omitempty"`
+}
+
+// ToProto converts this FirestoreCity_MyNestedMessage to its protobuf representation.
+func (m *FirestoreCity_MyNestedMessage) ToProto() (*City_MyNestedMessage, error) {
+	x := new(City_MyNestedMessage)
+	x.Name = m.Name
+	return x, nil
+}
+
+// ToFirestore returns the Firestore Custom Object for City_MyNestedMessage.
+func (x *City_MyNestedMessage) ToFirestore() (*FirestoreCity_MyNestedMessage, error) {
+	m := new(FirestoreCity_MyNestedMessage)
+	m.Name = x.Name
+	return m, nil
+}
+
+// FirestoreMayor is the Firestore Custom Object for customobject.Mayor.
+type FirestoreMayor struct {
+	Name    string            `firestore:"name,omitempty"`
+	Address *FirestoreAddress `firestore:"address,omitempty"`
+}
+
+// ToProto converts this FirestoreMayor to its protobuf representation.
+func (m *FirestoreMayor) ToProto() (*Mayor, error) {
+	x := new(Mayor)
+	x.Name = m.Name
+	if c, err := m.Address.ToProto(); err != nil {
+		return nil, err
+	} else {
+		x.Address = c
+	}
+	return x, nil
+}
+
+// ToFirestore returns the Firestore Custom Object for Mayor.
+func (x *Mayor) ToFirestore() (*FirestoreMayor, error) {
+	m := new(FirestoreMayor)
+	m.Name = x.Name
+	if c, err := x.Address.ToFirestore(); err != nil {
+		return nil, err
+	} else {
+		m.Address = c
+	}
+	return m, nil
+}
+
+// FirestoreAddress is the Firestore Custom Object for customobject.Address.
+type FirestoreAddress struct {
+	Value string `firestore:"value,omitempty"`
+}
+
+// ToProto converts this FirestoreAddress to its protobuf representation.
+func (m *FirestoreAddress) ToProto() (*Address, error) {
+	x := new(Address)
+	x.Value = m.Value
+	return x, nil
+}
+
+// ToFirestore returns the Firestore Custom Object for Address.
+func (x *Address) ToFirestore() (*FirestoreAddress, error) {
+	m := new(FirestoreAddress)
+	m.Value = x.Value
 	return m, nil
 }

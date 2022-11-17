@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/complex64/protoc-gen-go-firestore/firestorepb"
+	"github.com/rs/zerolog/log"
 	"google.golang.org/protobuf/compiler/protogen"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/descriptorpb"
@@ -72,9 +73,15 @@ func (m *Message) initOpts() {
 
 // Gen generates GORM models and supporting APIs.
 func (m *Message) Gen() {
+	log.Trace().
+		Str("file", m.file.proto.Desc.Path()).
+		Str("msg", m.ProtoName()).
+		Msg("(m *Message).Gen()")
+
 	if !m.enabled() {
 		return
 	}
+
 	// m.genCollectionNameConstant()
 	m.genCustomObjectStructType()
 	m.genConverterMethods()
@@ -137,7 +144,8 @@ func (m *Message) CollectionConstantName() string {
 }
 
 func (m *Message) enabled() bool {
-	return m.opts.Enabled || m.file.Enabled()
+	_, nested := m.file.nested[m.ProtoName()]
+	return m.opts.Enabled || m.file.Enabled() || nested
 }
 
 func (m *Message) Annotate(symbol string, loc protogen.Location) {

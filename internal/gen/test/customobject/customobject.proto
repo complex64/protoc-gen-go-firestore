@@ -53,4 +53,21 @@ message City {
   google.protobuf.Timestamp server_timestamp_field = 27 [
     (firestore.field).server_timestamp = true
   ];
+
+  Mayor mayor = 28;
+
+  message MyNestedMessage {
+    string name = 1;
+  }
+
+  MyNestedMessage my_nested_field = 29;
+}
+
+message Mayor {
+  string name = 1;
+  Address address = 2;
+}
+
+message Address {
+  string value = 1;
 }

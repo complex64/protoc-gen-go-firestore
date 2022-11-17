@@ -3,6 +3,7 @@ package gen
 import (
 	"fmt"
 
+	"github.com/rs/zerolog/log"
 	"google.golang.org/protobuf/compiler/protogen"
 	"google.golang.org/protobuf/reflect/protoreflect"
 )
@@ -83,7 +84,15 @@ func (t *FieldType) init() error {
 		panic(fmt.Sprintf("TODO: External custom types: %+v", t.Go))
 
 	case t.IsCustom && !t.IsExternal:
-		panic(fmt.Sprintf("TODO: Internal custom types: %+v", t.Go))
+		log.Info().
+			Str("parent", t.field.msg.ProtoName()).
+			Str("msg", t.Go.GoName).
+			Msg("nested")
+
+		t.IsPointer = true
+		t.Firestore.GoName = "Firestore" + t.Go.GoName
+		t.field.msg.file.nested[t.Go.GoName] = struct{}{}
+		// panic(fmt.Sprintf("TODO: Internal custom types: %+v", t.Go))
 	}
 
 	return nil
