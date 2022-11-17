@@ -29,8 +29,8 @@ type FirestoreCity struct {
 	RepeatedInt64Field     []int64     `firestore:"repeatedInt64Field,omitempty"`
 	Uint32Field            uint32      `firestore:"uint32Field,omitempty"`
 	RepeatedUint32Field    []uint32    `firestore:"repeatedUint32Field,omitempty"`
-	Uint64Field            uint64      `firestore:"uint64Field,omitempty"`
-	RepeatedUint64Field    []uint64    `firestore:"repeatedUint64Field,omitempty"`
+	Uint64Field            int64       `firestore:"uint64Field,omitempty"`
+	RepeatedUint64Field    []int64     `firestore:"repeatedUint64Field,omitempty"`
 	Sint32Field            int32       `firestore:"sint32Field,omitempty"`
 	RepeatedSint32Field    []int32     `firestore:"repeatedSint32Field,omitempty"`
 	Sint64Field            int64       `firestore:"sint64Field,omitempty"`
