@@ -55,10 +55,12 @@ func (f *Field) genConvertTimestampToFirestore() {
 
 func (f *Field) genConvertPointerToFirestore() {
 	if f.fieldType.IsCustom && !f.fieldType.IsExternal {
+		f.P("if x.", f.Name(), " != nil {")
 		f.P("if c, err := x.", f.Name(), ".ToFirestore(); err != nil {")
 		f.P("return nil, err")
 		f.P("} else {")
 		f.P("m.", f.Name(), " = c")
+		f.P("}")
 		f.P("}")
 	} else {
 		f.P("m.", f.Name(), " = *x.", f.Name())

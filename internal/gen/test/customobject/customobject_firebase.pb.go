@@ -83,15 +83,19 @@ func (m *FirestoreCity) ToProto() (*City, error) {
 	if m.ServerTimestampField != (time.Time{}) {
 		x.ServerTimestampField = timestamppb.New(m.ServerTimestampField)
 	}
-	if c, err := m.Mayor.ToProto(); err != nil {
-		return nil, err
-	} else {
-		x.Mayor = c
+	if m.Mayor != nil {
+		if c, err := m.Mayor.ToProto(); err != nil {
+			return nil, err
+		} else {
+			x.Mayor = c
+		}
 	}
-	if c, err := m.MyNestedField.ToProto(); err != nil {
-		return nil, err
-	} else {
-		x.MyNestedField = c
+	if m.MyNestedField != nil {
+		if c, err := m.MyNestedField.ToProto(); err != nil {
+			return nil, err
+		} else {
+			x.MyNestedField = c
+		}
 	}
 	return x, nil
 }
@@ -136,15 +140,19 @@ func (x *City) ToFirestore() (*FirestoreCity, error) {
 	if t := x.ServerTimestampField; t != nil {
 		m.ServerTimestampField = t.AsTime()
 	}
-	if c, err := x.Mayor.ToFirestore(); err != nil {
-		return nil, err
-	} else {
-		m.Mayor = c
+	if x.Mayor != nil {
+		if c, err := x.Mayor.ToFirestore(); err != nil {
+			return nil, err
+		} else {
+			m.Mayor = c
+		}
 	}
-	if c, err := x.MyNestedField.ToFirestore(); err != nil {
-		return nil, err
-	} else {
-		m.MyNestedField = c
+	if x.MyNestedField != nil {
+		if c, err := x.MyNestedField.ToFirestore(); err != nil {
+			return nil, err
+		} else {
+			m.MyNestedField = c
+		}
 	}
 	return m, nil
 }
@@ -178,10 +186,12 @@ type FirestoreMayor struct {
 func (m *FirestoreMayor) ToProto() (*Mayor, error) {
 	x := new(Mayor)
 	x.Name = m.Name
-	if c, err := m.Address.ToProto(); err != nil {
-		return nil, err
-	} else {
-		x.Address = c
+	if m.Address != nil {
+		if c, err := m.Address.ToProto(); err != nil {
+			return nil, err
+		} else {
+			x.Address = c
+		}
 	}
 	return x, nil
 }
@@ -190,10 +200,12 @@ func (m *FirestoreMayor) ToProto() (*Mayor, error) {
 func (x *Mayor) ToFirestore() (*FirestoreMayor, error) {
 	m := new(FirestoreMayor)
 	m.Name = x.Name
-	if c, err := x.Address.ToFirestore(); err != nil {
-		return nil, err
-	} else {
-		m.Address = c
+	if x.Address != nil {
+		if c, err := x.Address.ToFirestore(); err != nil {
+			return nil, err
+		} else {
+			m.Address = c
+		}
 	}
 	return m, nil
 }

@@ -36,10 +36,12 @@ func (f *Field) genConvertFieldToProto() {
 
 func (f *Field) genConvertPointerToProto() {
 	if f.fieldType.IsCustom && !f.fieldType.IsExternal {
+		f.P("if m.", f.Name(), " != nil {")
 		f.P("if c, err := m.", f.Name(), ".ToProto(); err != nil {")
 		f.P("return nil, err")
 		f.P("} else {")
 		f.P("x.", f.Name(), " = c")
+		f.P("}")
 		f.P("}")
 	} else {
 		f.P("x.", f.Name(), " = *m.", f.Name())

@@ -32,4 +32,21 @@ message City {
   repeated float repeated_float_field = 22;
   repeated double repeated_double_field = 23;
   repeated google.protobuf.Timestamp repeated_timestamp_field = 24;
+
+  Mayor mayor = 28;
+
+  message MyNestedMessage {
+    string name = 1;
+  }
+
+  MyNestedMessage my_nested_field = 29;
+}
+
+message Mayor {
+  string name = 1;
+  Address address = 2;
+}
+
+message Address {
+  string value = 1;
 }

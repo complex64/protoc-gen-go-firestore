@@ -9,7 +9,7 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-func TestConverters(t *testing.T) {
+func TestConverters_ToFirestore(t *testing.T) {
 	now := time.Now().UTC()
 	city := &converter.City{
 		StringField:            "",
@@ -62,4 +62,23 @@ func TestConverters(t *testing.T) {
 
 	require.Len(t, fs.RepeatedTimestampField, 1)
 	require.Equal(t, now, fs.RepeatedTimestampField[0])
+}
+
+func TestNestedConverters_ToFirestore(t *testing.T) {
+	city := &converter.City{
+		Mayor: &converter.Mayor{
+			Name:    "Mayor",
+			Address: &converter.Address{Value: "Address"},
+		},
+		MyNestedField: &converter.City_MyNestedMessage{
+			Name: "Nested",
+		},
+	}
+	fs, err := city.ToFirestore()
+	require.NoError(t, err)
+
+	require.NotNil(t, fs.Mayor)
+	require.Equal(t, city.Mayor.Name, fs.Mayor.Name)
+	require.Equal(t, city.Mayor.Address.Value, fs.Mayor.Address.Value)
+	require.Equal(t, city.MyNestedField.Name, fs.MyNestedField.Name)
 }
