@@ -1,4 +1,4 @@
-# Proto files which include `gorm/options.proto`
+# Proto files which include `firestore/options.proto`
 # compile to Go code that imports "github.com/complex64/protoc-gen-go-firestore/firestorepb";
 # Generate the package:
 version: v1

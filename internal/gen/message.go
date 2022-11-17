@@ -59,7 +59,7 @@ func (m *Message) initField(proto *protogen.Field) error {
 }
 
 // initOpts reads the protoc-gen-go-firestore options set for this message.
-// Example: message MyMessage { option (gorm.message).model = true; }
+// Example: message MyMessage { option (firestore.message).model = true; }
 func (m *Message) initOpts() {
 	descOpts := m.proto.Desc.Options()
 	opts, ok := proto.GetExtension(descOpts, firestorepb.E_Message).(*firestorepb.MessageOptions)

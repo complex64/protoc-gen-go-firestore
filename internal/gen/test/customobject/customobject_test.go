@@ -29,7 +29,8 @@ func TestCustomObjectStructTypeGeneration(t *testing.T) {
 	city.Uint32Field = 0
 	city.RepeatedUint32Field = []uint32{}
 
-	// uint64 is disallowed, because it may be able to represent values that cannot be represented in an int64, which is the underlying type of an Integer in Firestore.
+	// uint64 is disallowed, because it may be able to represent values that cannot be represented
+	// in an int64, which is the underlying type of Integer in Firestore.
 	city.Uint64Field = 0
 	city.RepeatedUint64Field = []int64{}
 

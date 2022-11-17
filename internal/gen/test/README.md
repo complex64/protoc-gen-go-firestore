@@ -10,4 +10,5 @@ A test case consists of:
 
 ## Including `options.proto`
 
-The `.proto` files in this test suite reference `gorm/options.proto` just like a user would. We just symlink them into the local tree for convenient feature development without having to copy files around.
+The `.proto` files in this test suite reference `firestore/options.proto` just like a user would.
+We just symlink them into the local tree for convenient feature development without having to copy files around.
