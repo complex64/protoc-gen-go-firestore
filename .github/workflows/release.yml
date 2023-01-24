@@ -127,7 +127,7 @@ jobs:
           path: ${{ steps.go-cache-paths.outputs.go-mod }}
 
       - run: git config --global url."https://bearer:${{ steps.token.outputs.token }}@github.com".insteadOf "https://github.com"
-      - run: mkdir bin && go build -ldflags="-w -s" -o bin/protoc-gen-go-firestore-${{ matrix.goos }}-${{ matrix.goarch }} ./cmd/protoc-gen-go-firestore
+      - run: mkdir bin && go build -ldflags="-w -s" -o bin/protoc-gen-go-firestore-${{ matrix.goos }}-${{ matrix.goarch }} ./
         env:
           CGO_ENABLED: 0
           GOOS: ${{ matrix.goos }}
