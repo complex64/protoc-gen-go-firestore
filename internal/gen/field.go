@@ -71,7 +71,7 @@ func (f *Field) tags() string {
 		return ""
 	}
 
-	joined := strings.Join(vals, ";")
+	joined := strings.Join(vals, ",")
 	quoted := strconv.Quote(joined)
 	escaped := strings.Replace(quoted, "`", `\x60`, -1)
 	return fmt.Sprintf("`firestore:%s`", escaped)
