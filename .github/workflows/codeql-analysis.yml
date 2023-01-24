@@ -1,9 +1,6 @@
 # https://github.com/complex64/protoc-gen-go-firestore/security/code-scanning
 name: "CodeQL"
 on:
-  push:
-    branches:
-      - main
   pull_request:
     # Must be a subset of the branches above
     branches:
