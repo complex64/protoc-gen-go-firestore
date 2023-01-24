@@ -10,7 +10,7 @@ test:
 # Build and run the aggregated linker.
 l: lint
 lint: build
-	golangci-lint run
+	golangci-lint run ./...
 
 # Lint the .proto files with buf.
 b: buf

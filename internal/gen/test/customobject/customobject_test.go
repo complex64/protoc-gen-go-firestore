@@ -83,7 +83,7 @@ func TestCustomObjectTags(t *testing.T) {
 
 	require.StructFieldTags(t, city, "NamedStringField", map[string]string{"firestore": "custom_name,omitempty"})
 	require.StructFieldTags(t, city, "IgnoredStringField", map[string]string{"firestore": "-"})
-	require.StructFieldTags(t, city, "ServerTimestampField", map[string]string{"firestore": "serverTimestamp"})
+	require.StructFieldTags(t, city, "ServerTimestampField", map[string]string{"firestore": "serverTimestampField,serverTimestamp"})
 }
 
 func TestCustomObjectStructNestedTypeGeneration(t *testing.T) {
