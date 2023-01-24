@@ -82,7 +82,7 @@ func (f *Field) tagVals() (values []string) {
 		return []string{"-"}
 	}
 	if f.opts.ServerTimestamp {
-		return []string{"serverTimestamp"}
+		return []string{f.FirestoreFieldName(), "serverTimestamp"}
 	}
 	values = append(values, f.FirestoreFieldName()+",omitempty")
 	return
