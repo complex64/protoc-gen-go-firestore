@@ -144,42 +144,42 @@ func (p *Package) genCollectionChainMethods(
 
 func (p *Package) genCollectionChainMethod(
 	parent *Collection,
-	collection *Collection,
+	c *Collection,
 ) {
-	if collection == nil {
+	if c == nil {
 		return
 	}
-	p.genCollectionMethod(collection)
-	p.genCollectionType(collection)
-	p.genDocumentMethod(collection)
-	p.genDocumentType(collection)
+	p.genCollectionMethod(c)
+	p.genCollectionType(c)
+	p.genDocumentMethod(c)
+	p.genDocumentType(c)
 
-	if collection.Document != nil {
-		p.genDocumentChainMethod(collection, collection.Document)
+	if c.Document != nil {
+		p.genDocumentChainMethod(c, c.Document)
 	}
 }
 
-func (p *Package) genDocumentType(collection *Collection) {
+func (p *Package) genDocumentType(c *Collection) {
 	docType := p.out.QualifiedGoIdent(protogen.GoIdent{
 		GoName:       "DocumentRef",
 		GoImportPath: "cloud.google.com/go/firestore",
 	})
 
 	p.P(Comment(""),
-		"type ", collection.NestedDocumentTypeName(p.packageFirestoreType()), " struct {")
-	p.P("document *", docType)
+		"type ", c.NestedDocumentTypeName(p.packageFirestoreType()), " struct {")
+	p.P("d *", docType)
 	p.P("}")
 	p.P()
 }
 
-func (p *Package) genDocumentMethod(collection *Collection) {
+func (p *Package) genDocumentMethod(c *Collection) {
 	p.P(Comment(""),
-		"func (f *", collection.TypeName(p.packageFirestoreType()), ") ",
+		"func (f *", c.TypeName(p.packageFirestoreType()), ") ",
 		"Doc(id string)",
-		"*", collection.NestedDocumentTypeName(p.packageFirestoreType()),
+		"*", c.NestedDocumentTypeName(p.packageFirestoreType()),
 		" {")
-	p.P("return &", collection.NestedDocumentTypeName(p.packageFirestoreType()), " {")
-	p.P("document: f.collection.Doc(id),")
+	p.P("return &", c.NestedDocumentTypeName(p.packageFirestoreType()), " {")
+	p.P("d: f.c.Doc(id),")
 	p.P("}")
 	p.P("}")
 	p.P()
@@ -193,9 +193,9 @@ func (p *Package) genCollectionMethod(c *Collection) {
 	p.P("return &", c.TypeName(p.packageFirestoreType()), "{")
 
 	if c.Parent == nil {
-		p.P("collection: f.client.Collection(\"", c.Segment, "\"),")
+		p.P("c: f.client.Collection(\"", c.Segment, "\"),")
 	} else {
-		p.P("collection: f.document.Collection(\"", c.Segment, "\"),")
+		p.P("c: f.d.Collection(\"", c.Segment, "\"),")
 	}
 
 	p.P("}")
@@ -211,7 +211,7 @@ func (p *Package) genCollectionType(c *Collection) {
 
 	p.P(Comment(""),
 		"type ", c.TypeName(p.packageFirestoreType()), " struct {")
-	p.P("collection *", collType)
+	p.P("c *", collType)
 	p.P("}")
 	p.P()
 }

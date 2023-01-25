@@ -12,59 +12,6 @@ import (
 	time "time"
 )
 
-// FirestoreMayor is the Firestore Custom Object for converter.Mayor.
-type FirestoreMayor struct {
-	Name    string            `firestore:"name,omitempty"`
-	Address *FirestoreAddress `firestore:"address,omitempty"`
-}
-
-// ToProto converts this FirestoreMayor to its protobuf representation.
-func (m *FirestoreMayor) ToProto() (*Mayor, error) {
-	x := new(Mayor)
-	x.Name = m.Name
-	if m.Address != nil {
-		if c, err := m.Address.ToProto(); err != nil {
-			return nil, err
-		} else {
-			x.Address = c
-		}
-	}
-	return x, nil
-}
-
-// ToFirestore returns the Firestore Custom Object for Mayor.
-func (x *Mayor) ToFirestore() (*FirestoreMayor, error) {
-	m := new(FirestoreMayor)
-	m.Name = x.Name
-	if x.Address != nil {
-		if c, err := x.Address.ToFirestore(); err != nil {
-			return nil, err
-		} else {
-			m.Address = c
-		}
-	}
-	return m, nil
-}
-
-// FirestoreAddress is the Firestore Custom Object for converter.Address.
-type FirestoreAddress struct {
-	Value string `firestore:"value,omitempty"`
-}
-
-// ToProto converts this FirestoreAddress to its protobuf representation.
-func (m *FirestoreAddress) ToProto() (*Address, error) {
-	x := new(Address)
-	x.Value = m.Value
-	return x, nil
-}
-
-// ToFirestore returns the Firestore Custom Object for Address.
-func (x *Address) ToFirestore() (*FirestoreAddress, error) {
-	m := new(FirestoreAddress)
-	m.Value = x.Value
-	return m, nil
-}
-
 // FirestoreCity is the Firestore Custom Object for converter.City.
 type FirestoreCity struct {
 	StringField            string                         `firestore:"stringField,omitempty"`
@@ -213,5 +160,58 @@ func (m *FirestoreCity_MyNestedMessage) ToProto() (*City_MyNestedMessage, error)
 func (x *City_MyNestedMessage) ToFirestore() (*FirestoreCity_MyNestedMessage, error) {
 	m := new(FirestoreCity_MyNestedMessage)
 	m.Name = x.Name
+	return m, nil
+}
+
+// FirestoreMayor is the Firestore Custom Object for converter.Mayor.
+type FirestoreMayor struct {
+	Name    string            `firestore:"name,omitempty"`
+	Address *FirestoreAddress `firestore:"address,omitempty"`
+}
+
+// ToProto converts this FirestoreMayor to its protobuf representation.
+func (m *FirestoreMayor) ToProto() (*Mayor, error) {
+	x := new(Mayor)
+	x.Name = m.Name
+	if m.Address != nil {
+		if c, err := m.Address.ToProto(); err != nil {
+			return nil, err
+		} else {
+			x.Address = c
+		}
+	}
+	return x, nil
+}
+
+// ToFirestore returns the Firestore Custom Object for Mayor.
+func (x *Mayor) ToFirestore() (*FirestoreMayor, error) {
+	m := new(FirestoreMayor)
+	m.Name = x.Name
+	if x.Address != nil {
+		if c, err := x.Address.ToFirestore(); err != nil {
+			return nil, err
+		} else {
+			m.Address = c
+		}
+	}
+	return m, nil
+}
+
+// FirestoreAddress is the Firestore Custom Object for converter.Address.
+type FirestoreAddress struct {
+	Value string `firestore:"value,omitempty"`
+}
+
+// ToProto converts this FirestoreAddress to its protobuf representation.
+func (m *FirestoreAddress) ToProto() (*Address, error) {
+	x := new(Address)
+	x.Value = m.Value
+	return x, nil
+}
+
+// ToFirestore returns the Firestore Custom Object for Address.
+func (x *Address) ToFirestore() (*FirestoreAddress, error) {
+	m := new(FirestoreAddress)
+	m.Value = x.Value
 	return m, nil
 }

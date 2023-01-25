@@ -21,60 +21,60 @@ func Firestore(client *firestore.Client) *FS_utils {
 
 func (f *FS_utils) Accounts() *FS_utils_Accounts {
 	return &FS_utils_Accounts{
-		collection: f.client.Collection("accounts"),
+		c: f.client.Collection("accounts"),
 	}
 }
 
 type FS_utils_Accounts struct {
-	collection *firestore.CollectionRef
+	c *firestore.CollectionRef
 }
 
 func (f *FS_utils_Accounts) Doc(id string) *FS_utils_Accounts_Doc {
 	return &FS_utils_Accounts_Doc{
-		document: f.collection.Doc(id),
+		d: f.c.Doc(id),
 	}
 }
 
 type FS_utils_Accounts_Doc struct {
-	document *firestore.DocumentRef
+	d *firestore.DocumentRef
 }
 
 func (f *FS_utils_Accounts_Doc) Users() *FS_utils_Accounts_Users {
 	return &FS_utils_Accounts_Users{
-		collection: f.document.Collection("users"),
+		c: f.d.Collection("users"),
 	}
 }
 
 type FS_utils_Accounts_Users struct {
-	collection *firestore.CollectionRef
+	c *firestore.CollectionRef
 }
 
 func (f *FS_utils_Accounts_Users) Doc(id string) *FS_utils_Accounts_Users_Doc {
 	return &FS_utils_Accounts_Users_Doc{
-		document: f.collection.Doc(id),
+		d: f.c.Doc(id),
 	}
 }
 
 type FS_utils_Accounts_Users_Doc struct {
-	document *firestore.DocumentRef
+	d *firestore.DocumentRef
 }
 
 func (f *FS_utils_Accounts_Users_Doc) Sessions() *FS_utils_Accounts_Users_Sessions {
 	return &FS_utils_Accounts_Users_Sessions{
-		collection: f.document.Collection("sessions"),
+		c: f.d.Collection("sessions"),
 	}
 }
 
 type FS_utils_Accounts_Users_Sessions struct {
-	collection *firestore.CollectionRef
+	c *firestore.CollectionRef
 }
 
 func (f *FS_utils_Accounts_Users_Sessions) Doc(id string) *FS_utils_Accounts_Users_Sessions_Doc {
 	return &FS_utils_Accounts_Users_Sessions_Doc{
-		document: f.collection.Doc(id),
+		d: f.c.Doc(id),
 	}
 }
 
 type FS_utils_Accounts_Users_Sessions_Doc struct {
-	document *firestore.DocumentRef
+	d *firestore.DocumentRef
 }
