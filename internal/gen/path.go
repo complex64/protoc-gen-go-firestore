@@ -19,13 +19,15 @@ func (m *Message) parseCollection() (*Path, error) {
 				Segment: elems[i],
 				Title:   title.String(elems[i]),
 				Parent:  doc,
-				Message: m,
 			}
 			if doc != nil {
 				doc.Collections[coll.Segment] = coll
 			}
 			if i == 0 {
 				root.Collection = coll
+			}
+			if i+1 == len(elems) {
+				coll.Message = m
 			}
 		} else {
 			doc = &Document{

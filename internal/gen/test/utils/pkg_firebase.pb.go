@@ -80,58 +80,8 @@ func (x *FS_utils_Accounts_Query) Limit(n int) *FS_utils_Accounts_Query {
 	}
 }
 
-func (x *FS_utils_Accounts_Iter) GetAll() ([]*Session, error) {
-	snaps, err := x.i.GetAll()
-	if err != nil {
-		return nil, err
-	}
-	protos := make([]*Session, len(snaps))
-	for i, snap := range snaps {
-		p := new(Session)
-		if err := snap.DataTo(p); err != nil {
-			return nil, err
-		}
-		protos[i] = p
-	}
-	return protos, nil
-}
-
-func (x *FS_utils_Accounts_Iter) GetAllAsSnapshots() ([]*firestore.DocumentSnapshot, error) {
-	return x.i.GetAll()
-}
-
-func (x *FS_utils_Accounts_Iter) Next() (*Session, error) {
-	snap, err := x.i.Next()
-	if err != nil {
-		return nil, err
-	}
-	p := new(Session)
-	if err := snap.DataTo(p); err != nil {
-		return nil, err
-	}
-	return p, nil
-}
-
-func (x *FS_utils_Accounts_Iter) NextAsSnapshot() (*firestore.DocumentSnapshot, error) {
-	return x.i.Next()
-}
-
 func (x *FS_utils_Accounts_Iter) Stop() {
 	x.i.Stop()
-}
-
-func (x *FS_utils_Accounts_Query) First(ctx context.Context) (*Session, error) {
-	iter := x.q.Limit(1).Documents(ctx)
-	defer iter.Stop()
-	snap, err := iter.Next()
-	if err != nil {
-		return nil, err
-	}
-	p := new(Session)
-	if err := snap.DataTo(p); err != nil {
-		return nil, err
-	}
-	return p, nil
 }
 
 func (x *FS_utils_Accounts) Doc(id string) *FS_utils_Accounts_Doc {
@@ -142,17 +92,6 @@ func (x *FS_utils_Accounts) Doc(id string) *FS_utils_Accounts_Doc {
 
 type FS_utils_Accounts_Doc struct {
 	d *firestore.DocumentRef
-}
-
-func (x *FS_utils_Accounts_Doc) Set(ctx context.Context, m *Session) error {
-	fs, err := m.ToFirestore()
-	if err != nil {
-		return err
-	}
-	if _, err := x.d.Set(ctx, fs); err != nil {
-		return err
-	}
-	return nil
 }
 
 func (x *FS_utils_Accounts_Doc) Users() *FS_utils_Accounts_Users {
@@ -215,58 +154,8 @@ func (x *FS_utils_Accounts_Users_Query) Limit(n int) *FS_utils_Accounts_Users_Qu
 	}
 }
 
-func (x *FS_utils_Accounts_Users_Iter) GetAll() ([]*Session, error) {
-	snaps, err := x.i.GetAll()
-	if err != nil {
-		return nil, err
-	}
-	protos := make([]*Session, len(snaps))
-	for i, snap := range snaps {
-		p := new(Session)
-		if err := snap.DataTo(p); err != nil {
-			return nil, err
-		}
-		protos[i] = p
-	}
-	return protos, nil
-}
-
-func (x *FS_utils_Accounts_Users_Iter) GetAllAsSnapshots() ([]*firestore.DocumentSnapshot, error) {
-	return x.i.GetAll()
-}
-
-func (x *FS_utils_Accounts_Users_Iter) Next() (*Session, error) {
-	snap, err := x.i.Next()
-	if err != nil {
-		return nil, err
-	}
-	p := new(Session)
-	if err := snap.DataTo(p); err != nil {
-		return nil, err
-	}
-	return p, nil
-}
-
-func (x *FS_utils_Accounts_Users_Iter) NextAsSnapshot() (*firestore.DocumentSnapshot, error) {
-	return x.i.Next()
-}
-
 func (x *FS_utils_Accounts_Users_Iter) Stop() {
 	x.i.Stop()
-}
-
-func (x *FS_utils_Accounts_Users_Query) First(ctx context.Context) (*Session, error) {
-	iter := x.q.Limit(1).Documents(ctx)
-	defer iter.Stop()
-	snap, err := iter.Next()
-	if err != nil {
-		return nil, err
-	}
-	p := new(Session)
-	if err := snap.DataTo(p); err != nil {
-		return nil, err
-	}
-	return p, nil
 }
 
 func (x *FS_utils_Accounts_Users) Doc(id string) *FS_utils_Accounts_Users_Doc {
@@ -277,17 +166,6 @@ func (x *FS_utils_Accounts_Users) Doc(id string) *FS_utils_Accounts_Users_Doc {
 
 type FS_utils_Accounts_Users_Doc struct {
 	d *firestore.DocumentRef
-}
-
-func (x *FS_utils_Accounts_Users_Doc) Set(ctx context.Context, m *Session) error {
-	fs, err := m.ToFirestore()
-	if err != nil {
-		return err
-	}
-	if _, err := x.d.Set(ctx, fs); err != nil {
-		return err
-	}
-	return nil
 }
 
 func (x *FS_utils_Accounts_Users_Doc) Sessions() *FS_utils_Accounts_Users_Sessions {
@@ -350,6 +228,20 @@ func (x *FS_utils_Accounts_Users_Sessions_Query) Limit(n int) *FS_utils_Accounts
 	}
 }
 
+func (x *FS_utils_Accounts_Users_Sessions_Query) First(ctx context.Context) (*Session, error) {
+	iter := x.q.Limit(1).Documents(ctx)
+	defer iter.Stop()
+	snap, err := iter.Next()
+	if err != nil {
+		return nil, err
+	}
+	p := new(Session)
+	if err := snap.DataTo(p); err != nil {
+		return nil, err
+	}
+	return p, nil
+}
+
 func (x *FS_utils_Accounts_Users_Sessions_Iter) GetAll() ([]*Session, error) {
 	snaps, err := x.i.GetAll()
 	if err != nil {
@@ -388,20 +280,6 @@ func (x *FS_utils_Accounts_Users_Sessions_Iter) NextAsSnapshot() (*firestore.Doc
 
 func (x *FS_utils_Accounts_Users_Sessions_Iter) Stop() {
 	x.i.Stop()
-}
-
-func (x *FS_utils_Accounts_Users_Sessions_Query) First(ctx context.Context) (*Session, error) {
-	iter := x.q.Limit(1).Documents(ctx)
-	defer iter.Stop()
-	snap, err := iter.Next()
-	if err != nil {
-		return nil, err
-	}
-	p := new(Session)
-	if err := snap.DataTo(p); err != nil {
-		return nil, err
-	}
-	return p, nil
 }
 
 func (x *FS_utils_Accounts_Users_Sessions) Doc(id string) *FS_utils_Accounts_Users_Sessions_Doc {

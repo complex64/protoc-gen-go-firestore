@@ -1,0 +1,13 @@
+syntax = "proto3";
+import "firestore/options.proto";
+package unlinked;
+option go_package = "github.com/complex64/protoc-gen-go-firestore/cmd/protoc-gen-go-firestore/test/unlinked";
+
+message Item {
+  option (firestore.message) = {
+    enabled:true
+    collection:"parents/{id}/subparents/{id}/items"
+  };
+
+  string name = 1;
+}

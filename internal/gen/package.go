@@ -156,10 +156,10 @@ func (p *Package) genCollectionChainMethod(
 	p.genCollectionMethodWhere(c)
 	p.genCollectionMethodOrderBy(c)
 	p.genCollectionMethodLimit(c)
+	p.genCollectionMethodFirst(c)
 	p.genCollectionMethodIterGetAll(c)
 	p.genCollectionMethodIterNext(c)
 	p.genCollectionMethodIterStop(c)
-	p.genCollectionMethodFirst(c)
 	p.genDocumentMethod(c)
 	p.genDocumentType(c)
 	p.genDocumentMethodSet(c)
@@ -353,6 +353,10 @@ func (p *Package) genCollectionMethodLimit(c *Collection) {
 }
 
 func (p *Package) genCollectionMethodIterGetAll(c *Collection) {
+	if c.Message == nil {
+		return
+	}
+
 	snapType := p.out.QualifiedGoIdent(protogen.GoIdent{
 		GoName:       "DocumentSnapshot",
 		GoImportPath: "cloud.google.com/go/firestore",
@@ -393,6 +397,10 @@ func (p *Package) genCollectionMethodIterGetAll(c *Collection) {
 }
 
 func (p *Package) genCollectionMethodIterNext(c *Collection) {
+	if c.Message == nil {
+		return
+	}
+
 	snapType := p.out.QualifiedGoIdent(protogen.GoIdent{
 		GoName:       "DocumentSnapshot",
 		GoImportPath: "cloud.google.com/go/firestore",
@@ -437,6 +445,10 @@ func (p *Package) genCollectionMethodIterStop(c *Collection) {
 }
 
 func (p *Package) genCollectionMethodFirst(c *Collection) {
+	if c.Message == nil {
+		return
+	}
+
 	ctxType := p.out.QualifiedGoIdent(protogen.GoIdent{
 		GoName:       "Context",
 		GoImportPath: "context",
@@ -524,6 +536,10 @@ func (c *Collection) ParentDocumentTypeName(prefix string) string {
 }
 
 func (p *Package) genDocumentMethodSet(c *Collection) {
+	if c.Message == nil {
+		return
+	}
+
 	ctxType := p.out.QualifiedGoIdent(protogen.GoIdent{
 		GoName:       "Context",
 		GoImportPath: "context",
