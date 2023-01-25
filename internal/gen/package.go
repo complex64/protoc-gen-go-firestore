@@ -151,6 +151,9 @@ func (p *Package) genCollectionChainMethod(
 	}
 	p.genCollectionMethod(c)
 	p.genCollectionType(c)
+	p.genCollectionTypeQuery(c)
+	p.genCollectionMethodWhere(c)
+	p.genCollectionMethodOrderBy(c)
 	p.genDocumentMethod(c)
 	p.genDocumentType(c)
 	p.genDocumentMethodSet(c)
@@ -217,6 +220,63 @@ func (p *Package) genCollectionType(c *Collection) {
 	p.P()
 }
 
+func (p *Package) genCollectionTypeQuery(c *Collection) {
+	qType := p.out.QualifiedGoIdent(protogen.GoIdent{
+		GoName:       "Query",
+		GoImportPath: "cloud.google.com/go/firestore",
+	})
+
+	p.P(Comment(""),
+		"type ", c.TypeNameQuery(p.packageFirestoreType()), " struct {")
+	p.P("q ", qType)
+	p.P("}")
+	p.P()
+}
+
+func (p *Package) genCollectionMethodWhere(c *Collection) {
+	p.P(Comment(""),
+		"func (x *", c.TypeName(p.packageFirestoreType()), ") Where(",
+		"path, op string, value interface{}",
+		")",
+		"*", c.TypeNameQuery(p.packageFirestoreType()),
+		" {")
+	p.P("return &", c.TypeNameQuery(p.packageFirestoreType()), "{")
+	p.P("q: x.c.Where(path, op, value),")
+	p.P("}")
+	p.P("}")
+	p.P()
+
+	p.P(Comment(""),
+		"func (x *", c.TypeNameQuery(p.packageFirestoreType()), ") Where(",
+		"path, op string, value interface{}",
+		")",
+		"*", c.TypeNameQuery(p.packageFirestoreType()),
+		" {")
+	p.P("return &", c.TypeNameQuery(p.packageFirestoreType()), "{")
+	p.P("q: x.q.Where(path, op, value),")
+	p.P("}")
+	p.P("}")
+	p.P()
+}
+
+func (p *Package) genCollectionMethodOrderBy(c *Collection) {
+	// p.P(Comment(""),
+	// 	"func (x *", c.ParentDocumentTypeName(p.packageFirestoreType()), ") ", c.Title, "()",
+	// 	"*", c.TypeName(p.packageFirestoreType()),
+	// 	" {")
+	// p.P("return &", c.TypeName(p.packageFirestoreType()), "{")
+	//
+	// if c.Parent == nil {
+	// 	p.P("c: x.client.Collection(\"", c.Segment, "\"),")
+	// } else {
+	// 	p.P("c: x.d.Collection(\"", c.Segment, "\"),")
+	// }
+	//
+	// p.P("}")
+	// p.P("}")
+	// p.P()
+}
+
 func (p *Package) genDocumentChainMethod(parent *Collection, doc *Document) {
 	if len(doc.Collections) > 0 {
 		p.genCollectionChainMethods(parent, doc.Collections)
@@ -257,6 +317,10 @@ func (c *Collection) TypeName(prefix string) string {
 			cur = nil
 		}
 	}
+}
+
+func (c *Collection) TypeNameQuery(prefix string) string {
+	return c.TypeName(prefix) + "_Query"
 }
 
 func (c *Collection) ParentDocumentTypeName(prefix string) string {

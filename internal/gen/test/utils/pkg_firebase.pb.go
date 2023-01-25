@@ -30,6 +30,22 @@ type FS_utils_Accounts struct {
 	c *firestore.CollectionRef
 }
 
+type FS_utils_Accounts_Query struct {
+	q firestore.Query
+}
+
+func (x *FS_utils_Accounts) Where(path, op string, value interface{}) *FS_utils_Accounts_Query {
+	return &FS_utils_Accounts_Query{
+		q: x.c.Where(path, op, value),
+	}
+}
+
+func (x *FS_utils_Accounts_Query) Where(path, op string, value interface{}) *FS_utils_Accounts_Query {
+	return &FS_utils_Accounts_Query{
+		q: x.q.Where(path, op, value),
+	}
+}
+
 func (x *FS_utils_Accounts) Doc(id string) *FS_utils_Accounts_Doc {
 	return &FS_utils_Accounts_Doc{
 		d: x.c.Doc(id),
@@ -61,6 +77,22 @@ type FS_utils_Accounts_Users struct {
 	c *firestore.CollectionRef
 }
 
+type FS_utils_Accounts_Users_Query struct {
+	q firestore.Query
+}
+
+func (x *FS_utils_Accounts_Users) Where(path, op string, value interface{}) *FS_utils_Accounts_Users_Query {
+	return &FS_utils_Accounts_Users_Query{
+		q: x.c.Where(path, op, value),
+	}
+}
+
+func (x *FS_utils_Accounts_Users_Query) Where(path, op string, value interface{}) *FS_utils_Accounts_Users_Query {
+	return &FS_utils_Accounts_Users_Query{
+		q: x.q.Where(path, op, value),
+	}
+}
+
 func (x *FS_utils_Accounts_Users) Doc(id string) *FS_utils_Accounts_Users_Doc {
 	return &FS_utils_Accounts_Users_Doc{
 		d: x.c.Doc(id),
@@ -90,6 +122,22 @@ func (x *FS_utils_Accounts_Users_Doc) Sessions() *FS_utils_Accounts_Users_Sessio
 
 type FS_utils_Accounts_Users_Sessions struct {
 	c *firestore.CollectionRef
+}
+
+type FS_utils_Accounts_Users_Sessions_Query struct {
+	q firestore.Query
+}
+
+func (x *FS_utils_Accounts_Users_Sessions) Where(path, op string, value interface{}) *FS_utils_Accounts_Users_Sessions_Query {
+	return &FS_utils_Accounts_Users_Sessions_Query{
+		q: x.c.Where(path, op, value),
+	}
+}
+
+func (x *FS_utils_Accounts_Users_Sessions_Query) Where(path, op string, value interface{}) *FS_utils_Accounts_Users_Sessions_Query {
+	return &FS_utils_Accounts_Users_Sessions_Query{
+		q: x.q.Where(path, op, value),
+	}
 }
 
 func (x *FS_utils_Accounts_Users_Sessions) Doc(id string) *FS_utils_Accounts_Users_Sessions_Doc {

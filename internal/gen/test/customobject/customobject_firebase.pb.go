@@ -12,25 +12,6 @@ import (
 	time "time"
 )
 
-// FirestoreAddress is the Firestore Custom Object for customobject.Address.
-type FirestoreAddress struct {
-	Value string `firestore:"value,omitempty"`
-}
-
-// ToProto converts this FirestoreAddress to its protobuf representation.
-func (m *FirestoreAddress) ToProto() (*Address, error) {
-	x := new(Address)
-	x.Value = m.Value
-	return x, nil
-}
-
-// ToFirestore returns the Firestore Custom Object for Address.
-func (x *Address) ToFirestore() (*FirestoreAddress, error) {
-	m := new(FirestoreAddress)
-	m.Value = x.Value
-	return m, nil
-}
-
 // FirestoreCity is the Firestore Custom Object for customobject.City.
 type FirestoreCity struct {
 	StringField            string                         `firestore:"stringField,omitempty"`
@@ -226,5 +207,24 @@ func (x *Mayor) ToFirestore() (*FirestoreMayor, error) {
 			m.Address = c
 		}
 	}
+	return m, nil
+}
+
+// FirestoreAddress is the Firestore Custom Object for customobject.Address.
+type FirestoreAddress struct {
+	Value string `firestore:"value,omitempty"`
+}
+
+// ToProto converts this FirestoreAddress to its protobuf representation.
+func (m *FirestoreAddress) ToProto() (*Address, error) {
+	x := new(Address)
+	x.Value = m.Value
+	return x, nil
+}
+
+// ToFirestore returns the Firestore Custom Object for Address.
+func (x *Address) ToFirestore() (*FirestoreAddress, error) {
+	m := new(FirestoreAddress)
+	m.Value = x.Value
 	return m, nil
 }
