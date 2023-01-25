@@ -153,6 +153,7 @@ func (p *Package) genCollectionChainMethod(
 	p.genCollectionType(c)
 	p.genDocumentMethod(c)
 	p.genDocumentType(c)
+	p.genDocumentMethodSet(c)
 
 	if c.Document != nil {
 		p.genDocumentChainMethod(c, c.Document)
@@ -174,12 +175,12 @@ func (p *Package) genDocumentType(c *Collection) {
 
 func (p *Package) genDocumentMethod(c *Collection) {
 	p.P(Comment(""),
-		"func (f *", c.TypeName(p.packageFirestoreType()), ") ",
+		"func (x *", c.TypeName(p.packageFirestoreType()), ") ",
 		"Doc(id string)",
 		"*", c.NestedDocumentTypeName(p.packageFirestoreType()),
 		" {")
 	p.P("return &", c.NestedDocumentTypeName(p.packageFirestoreType()), " {")
-	p.P("d: f.c.Doc(id),")
+	p.P("d: x.c.Doc(id),")
 	p.P("}")
 	p.P("}")
 	p.P()
@@ -187,15 +188,15 @@ func (p *Package) genDocumentMethod(c *Collection) {
 
 func (p *Package) genCollectionMethod(c *Collection) {
 	p.P(Comment(""),
-		"func (f *", c.ParentDocumentTypeName(p.packageFirestoreType()), ") ", c.Title, "()",
+		"func (x *", c.ParentDocumentTypeName(p.packageFirestoreType()), ") ", c.Title, "()",
 		"*", c.TypeName(p.packageFirestoreType()),
 		" {")
 	p.P("return &", c.TypeName(p.packageFirestoreType()), "{")
 
 	if c.Parent == nil {
-		p.P("c: f.client.Collection(\"", c.Segment, "\"),")
+		p.P("c: x.client.Collection(\"", c.Segment, "\"),")
 	} else {
-		p.P("c: f.d.Collection(\"", c.Segment, "\"),")
+		p.P("c: x.d.Collection(\"", c.Segment, "\"),")
 	}
 
 	p.P("}")
@@ -263,4 +264,34 @@ func (c *Collection) ParentDocumentTypeName(prefix string) string {
 		return prefix
 	}
 	return c.Parent.TypeName(prefix)
+}
+
+func (p *Package) genDocumentMethodSet(c *Collection) {
+	ctxType := p.out.QualifiedGoIdent(protogen.GoIdent{
+		GoName:       "Context",
+		GoImportPath: "context",
+	})
+
+	p.P(Comment(""),
+		"func (x *", c.NestedDocumentTypeName(p.packageFirestoreType()), ") ",
+		"Set(",
+		"ctx ", ctxType, ", ",
+		"m *", c.Message.ProtoName(),
+		") ",
+		// "*", c.NestedDocumentTypeName(p.packageFirestoreType()),
+		"error ",
+		" {")
+
+	p.P("fs, err := m.ToFirestore()")
+	p.P("if err  != nil {")
+	p.P("return err")
+	p.P("}")
+
+	p.P("if _, err := x.d.Set(ctx, ", "fs); err != nil {")
+	p.P("return err")
+	p.P("}")
+
+	p.P("return nil")
+	p.P("}")
+	p.P()
 }

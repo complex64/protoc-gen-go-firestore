@@ -19,6 +19,7 @@ func (m *Message) parseCollection() (*Path, error) {
 				Segment: elems[i],
 				Title:   title.String(elems[i]),
 				Parent:  doc,
+				Message: m,
 			}
 			if doc != nil {
 				doc.Collections[coll.Segment] = coll
@@ -47,6 +48,7 @@ type Collection struct {
 	Title    string
 	Document *Document
 	Parent   *Document
+	Message  *Message
 }
 
 func (c *Collection) Merge(right *Collection) *Collection {
