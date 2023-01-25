@@ -38,6 +38,12 @@ type FS_utils_Accounts_Query struct {
 	q firestore.Query
 }
 
+func (x *FS_utils_Accounts_Query) Documents(ctx context.Context) *FS_utils_Accounts_Iter {
+	return &FS_utils_Accounts_Iter{
+		i: x.q.Documents(ctx),
+	}
+}
+
 func (x *FS_utils_Accounts) Where(path, op string, value interface{}) *FS_utils_Accounts_Query {
 	return &FS_utils_Accounts_Query{
 		q: x.c.Where(path, op, value),
@@ -114,6 +120,20 @@ func (x *FS_utils_Accounts_Iter) Stop() {
 	x.i.Stop()
 }
 
+func (x *FS_utils_Accounts_Query) First(ctx context.Context) (*Session, error) {
+	iter := x.q.Limit(1).Documents(ctx)
+	defer iter.Stop()
+	snap, err := iter.Next()
+	if err != nil {
+		return nil, err
+	}
+	p := new(Session)
+	if err := snap.DataTo(p); err != nil {
+		return nil, err
+	}
+	return p, nil
+}
+
 func (x *FS_utils_Accounts) Doc(id string) *FS_utils_Accounts_Doc {
 	return &FS_utils_Accounts_Doc{
 		d: x.c.Doc(id),
@@ -151,6 +171,12 @@ type FS_utils_Accounts_Users_Iter struct {
 
 type FS_utils_Accounts_Users_Query struct {
 	q firestore.Query
+}
+
+func (x *FS_utils_Accounts_Users_Query) Documents(ctx context.Context) *FS_utils_Accounts_Users_Iter {
+	return &FS_utils_Accounts_Users_Iter{
+		i: x.q.Documents(ctx),
+	}
 }
 
 func (x *FS_utils_Accounts_Users) Where(path, op string, value interface{}) *FS_utils_Accounts_Users_Query {
@@ -229,6 +255,20 @@ func (x *FS_utils_Accounts_Users_Iter) Stop() {
 	x.i.Stop()
 }
 
+func (x *FS_utils_Accounts_Users_Query) First(ctx context.Context) (*Session, error) {
+	iter := x.q.Limit(1).Documents(ctx)
+	defer iter.Stop()
+	snap, err := iter.Next()
+	if err != nil {
+		return nil, err
+	}
+	p := new(Session)
+	if err := snap.DataTo(p); err != nil {
+		return nil, err
+	}
+	return p, nil
+}
+
 func (x *FS_utils_Accounts_Users) Doc(id string) *FS_utils_Accounts_Users_Doc {
 	return &FS_utils_Accounts_Users_Doc{
 		d: x.c.Doc(id),
@@ -266,6 +306,12 @@ type FS_utils_Accounts_Users_Sessions_Iter struct {
 
 type FS_utils_Accounts_Users_Sessions_Query struct {
 	q firestore.Query
+}
+
+func (x *FS_utils_Accounts_Users_Sessions_Query) Documents(ctx context.Context) *FS_utils_Accounts_Users_Sessions_Iter {
+	return &FS_utils_Accounts_Users_Sessions_Iter{
+		i: x.q.Documents(ctx),
+	}
 }
 
 func (x *FS_utils_Accounts_Users_Sessions) Where(path, op string, value interface{}) *FS_utils_Accounts_Users_Sessions_Query {
@@ -342,6 +388,20 @@ func (x *FS_utils_Accounts_Users_Sessions_Iter) NextAsSnapshot() (*firestore.Doc
 
 func (x *FS_utils_Accounts_Users_Sessions_Iter) Stop() {
 	x.i.Stop()
+}
+
+func (x *FS_utils_Accounts_Users_Sessions_Query) First(ctx context.Context) (*Session, error) {
+	iter := x.q.Limit(1).Documents(ctx)
+	defer iter.Stop()
+	snap, err := iter.Next()
+	if err != nil {
+		return nil, err
+	}
+	p := new(Session)
+	if err := snap.DataTo(p); err != nil {
+		return nil, err
+	}
+	return p, nil
 }
 
 func (x *FS_utils_Accounts_Users_Sessions) Doc(id string) *FS_utils_Accounts_Users_Sessions_Doc {

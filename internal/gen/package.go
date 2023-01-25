@@ -159,6 +159,7 @@ func (p *Package) genCollectionChainMethod(
 	p.genCollectionMethodIterGetAll(c)
 	p.genCollectionMethodIterNext(c)
 	p.genCollectionMethodIterStop(c)
+	p.genCollectionMethodFirst(c)
 	p.genDocumentMethod(c)
 	p.genDocumentType(c)
 	p.genDocumentMethodSet(c)
@@ -247,6 +248,23 @@ func (p *Package) genCollectionTypeQuery(c *Collection) {
 	p.P(Comment(""),
 		"type ", c.TypeNameQuery(p.packageFirestoreType()), " struct {")
 	p.P("q ", qType)
+	p.P("}")
+	p.P()
+
+	ctxType := p.out.QualifiedGoIdent(protogen.GoIdent{
+		GoName:       "Context",
+		GoImportPath: "context",
+	})
+
+	p.P(Comment(""),
+		"func (x *", c.TypeNameQuery(p.packageFirestoreType()), ") Documents(",
+		"ctx ", ctxType,
+		")",
+		"*", c.TypeNameIter(p.packageFirestoreType()),
+		" {")
+	p.P("return &", c.TypeNameIter(p.packageFirestoreType()), "{")
+	p.P("i: x.q.Documents(ctx),")
+	p.P("}")
 	p.P("}")
 	p.P()
 }
@@ -415,6 +433,36 @@ func (p *Package) genCollectionMethodIterStop(c *Collection) {
 		"func (x *", c.TypeNameIter(p.packageFirestoreType()), ") Stop() {")
 	p.P("x.i.Stop()")
 	p.P("}")
+	p.P()
+}
+
+func (p *Package) genCollectionMethodFirst(c *Collection) {
+	ctxType := p.out.QualifiedGoIdent(protogen.GoIdent{
+		GoName:       "Context",
+		GoImportPath: "context",
+	})
+
+	p.P(Comment(""),
+		"func (x *", c.TypeNameQuery(p.packageFirestoreType()), ") First(ctx ", ctxType, ") (",
+		"*", c.Message.ProtoName(), ", ",
+		"error",
+		") {")
+
+	p.P("iter := x.q.Limit(1).Documents(ctx)")
+	p.P("defer iter.Stop()")
+
+	p.P("snap, err := iter.Next()")
+	p.P("if err != nil {")
+	p.P("return nil, err")
+	p.P("}")
+
+	p.P("p := new(", c.Message.ProtoName(), ")")
+	p.P("if err := snap.DataTo(p); err != nil {")
+	p.P("return nil, err")
+	p.P("}")
+	p.P("return p, nil")
+
+	p.P("}") // func
 	p.P()
 }
 
