@@ -71,13 +71,10 @@ func (f *File) initMsgs() error {
 }
 
 func (f *File) initMsg(proto *protogen.Message) error {
-	// fmt.Fprintf(os.Stderr, "checking --> %s\n", proto.GoIdent.GoName)
 	if _, ok := f.msgs[proto.GoIdent.GoName]; ok {
 		f.msgs[proto.GoIdent.GoName].opts.Enabled = true
-		// fmt.Fprintf(os.Stderr, "already --> %s\n", proto.GoIdent.GoName)
 		return nil
 	}
-	// fmt.Fprintf(os.Stderr, "new --> %s\n", proto.GoIdent.GoName)
 
 	msg, err := NewMessage(f, proto)
 	if err != nil {

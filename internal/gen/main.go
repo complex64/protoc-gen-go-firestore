@@ -8,7 +8,12 @@ import (
 	"google.golang.org/protobuf/compiler/protogen"
 )
 
-func GenerateFile(fs flag.FlagSet, plugin *protogen.Plugin, proto *protogen.File) error {
+func GenerateFile(
+	fs flag.FlagSet,
+	plugin *protogen.Plugin,
+	proto *protogen.File,
+	packages *Packages,
+) error {
 	log.Trace().Str("file", proto.Desc.Path()).Msg("GenerateFile()")
 	defer log.Trace().Msg("-----------------------------------------------------------------------")
 
@@ -16,6 +21,7 @@ func GenerateFile(fs flag.FlagSet, plugin *protogen.Plugin, proto *protogen.File
 	if err != nil {
 		return err
 	}
+	packages.Collect(file)
 	file.Gen()
 	return nil
 }

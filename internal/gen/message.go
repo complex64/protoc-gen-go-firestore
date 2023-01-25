@@ -2,9 +2,12 @@ package gen
 
 import (
 	"fmt"
+	"path"
 
 	"github.com/complex64/protoc-gen-go-firestore/firestorepb"
 	"github.com/rs/zerolog/log"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 	"google.golang.org/protobuf/compiler/protogen"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/descriptorpb"
@@ -27,10 +30,12 @@ type Message struct {
 
 	opts   *firestorepb.MessageOptions
 	fields []*Field
+	path   *Path
 }
 
 func (m *Message) init() error {
 	m.initOpts()
+	m.initCollectionPath()
 	if err := m.initFields(); err != nil {
 		return err
 	}
@@ -71,6 +76,18 @@ func (m *Message) initOpts() {
 	}
 }
 
+func (m *Message) initCollectionPath() {
+	if m.opts.Collection == "" {
+		return
+	}
+
+	p, err := m.parseCollection()
+	if err != nil {
+		log.Fatal().Msg(err.Error())
+	}
+	m.path = p
+}
+
 // Gen generates GORM models and supporting APIs.
 func (m *Message) Gen() {
 	log.Trace().
@@ -82,26 +99,32 @@ func (m *Message) Gen() {
 		return
 	}
 
-	// m.genCollectionNameConstant()
+	m.genCollectionNameConstant()
 	m.genCustomObjectStructType()
 	m.genConverterMethods()
+	m.genUtilityMethods()
 }
 
-// func (m *Message) genCollectionNameConstant() {
-// 	m.Annotate(m.CollectionConstantName(), m.proto.Location)
-// 	m.P(m.leadingConstComment(), "const ", m.CollectionConstantName(), " = \"TODO\"")
-// 	m.P()
-// }
+func (m *Message) genCollectionNameConstant() {
+	if m.opts.Collection == "" {
+		return
+	}
 
-// func (m *Message) leadingConstComment() protogen.Comments {
-// 	return appendDeprecationNotice(
-// 		Comment(" %s is the Firestore collection name for documents of type %s.%s.",
-// 			m.CollectionConstantName(),
-// 			m.file.proto.GoPackageName,
-// 			m.proto.GoIdent.GoName),
-// 		m.deprecated(),
-// 	)
-// }
+	m.Annotate(m.CollectionConstantName(), m.proto.Location)
+	m.P(m.leadingConstComment(),
+		"const ", m.CollectionConstantName(), " = \"", m.CollectionName(), "\"")
+	m.P()
+}
+
+func (m *Message) leadingConstComment() protogen.Comments {
+	return appendDeprecationNotice(
+		Comment(" %s is the Firestore collection name for documents of type %s.%s.",
+			m.CollectionConstantName(),
+			m.file.proto.GoPackageName,
+			m.proto.GoIdent.GoName),
+		m.deprecated(),
+	)
+}
 
 func (m *Message) genCustomObjectStructType() {
 	m.Annotate(m.CustomObjectName(), m.proto.Location) // Message/document type declaration.
@@ -140,7 +163,7 @@ func (m *Message) CustomObjectName() string {
 }
 
 func (m *Message) CollectionConstantName() string {
-	return fmt.Sprintf("Firestore%sCollection", m.ProtoName())
+	return fmt.Sprintf("FirestoreCollection%s", m.CollectionNameTitle())
 }
 
 func (m *Message) enabled() bool {
@@ -154,4 +177,19 @@ func (m *Message) Annotate(symbol string, loc protogen.Location) {
 
 func (m *Message) P(v ...interface{}) {
 	m.file.P(v...)
+}
+
+var title cases.Caser
+
+func init() {
+	title = cases.Title(language.English)
+}
+
+func (m *Message) CollectionName() string {
+	_, coll := path.Split(m.opts.Collection)
+	return coll
+}
+
+func (m *Message) CollectionNameTitle() string {
+	return title.String(m.CollectionName())
 }

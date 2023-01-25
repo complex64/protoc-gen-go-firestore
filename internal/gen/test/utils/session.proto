@@ -1,0 +1,15 @@
+syntax = "proto3";
+import "firestore/options.proto";
+package utils;
+option go_package = "github.com/complex64/protoc-gen-go-firestore/cmd/protoc-gen-go-firestore/test/utils";
+
+// Expect generation of converter methods that map back and forth between Protobufs and Firestore Custom Objects.
+
+message Session {
+  option (firestore.message) = {
+    enabled:true
+    collection:"accounts/{id}/users/{id}/sessions"
+  };
+
+  string uuid = 1;
+}

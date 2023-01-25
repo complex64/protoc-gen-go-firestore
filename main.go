@@ -43,12 +43,18 @@ func main() {
 		// Calls `flags.Set(param, value)` for each from `--go_firestore_out=<param1>=<value1>,...`.
 		ParamFunc: flags.Set,
 	}.Run(func(plugin *protogen.Plugin) error {
+		var (
+			packages = gen.NewPackages(plugin)
+		)
 		for _, f := range plugin.Files {
 			if f.Generate {
-				if err := gen.GenerateFile(flags, plugin, f); err != nil {
+				if err := gen.GenerateFile(flags, plugin, f, packages); err != nil {
 					return err
 				}
 			}
+		}
+		if err := packages.Gen(); err != nil {
+			return err
 		}
 		return nil
 	})
