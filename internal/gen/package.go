@@ -151,9 +151,14 @@ func (p *Package) genCollectionChainMethod(
 	}
 	p.genCollectionMethod(c)
 	p.genCollectionType(c)
+	p.genCollectionTypeIterator(c)
 	p.genCollectionTypeQuery(c)
 	p.genCollectionMethodWhere(c)
 	p.genCollectionMethodOrderBy(c)
+	p.genCollectionMethodLimit(c)
+	p.genCollectionMethodIterGetAll(c)
+	p.genCollectionMethodIterNext(c)
+	p.genCollectionMethodIterStop(c)
 	p.genDocumentMethod(c)
 	p.genDocumentType(c)
 	p.genDocumentMethodSet(c)
@@ -220,6 +225,19 @@ func (p *Package) genCollectionType(c *Collection) {
 	p.P()
 }
 
+func (p *Package) genCollectionTypeIterator(c *Collection) {
+	iterType := p.out.QualifiedGoIdent(protogen.GoIdent{
+		GoName:       "DocumentIterator",
+		GoImportPath: "cloud.google.com/go/firestore",
+	})
+
+	p.P(Comment(""),
+		"type ", c.TypeNameIter(p.packageFirestoreType()), " struct {")
+	p.P("i *", iterType)
+	p.P("}")
+	p.P()
+}
+
 func (p *Package) genCollectionTypeQuery(c *Collection) {
 	qType := p.out.QualifiedGoIdent(protogen.GoIdent{
 		GoName:       "Query",
@@ -260,21 +278,144 @@ func (p *Package) genCollectionMethodWhere(c *Collection) {
 }
 
 func (p *Package) genCollectionMethodOrderBy(c *Collection) {
-	// p.P(Comment(""),
-	// 	"func (x *", c.ParentDocumentTypeName(p.packageFirestoreType()), ") ", c.Title, "()",
-	// 	"*", c.TypeName(p.packageFirestoreType()),
-	// 	" {")
-	// p.P("return &", c.TypeName(p.packageFirestoreType()), "{")
-	//
-	// if c.Parent == nil {
-	// 	p.P("c: x.client.Collection(\"", c.Segment, "\"),")
-	// } else {
-	// 	p.P("c: x.d.Collection(\"", c.Segment, "\"),")
-	// }
-	//
-	// p.P("}")
-	// p.P("}")
-	// p.P()
+	dirType := p.out.QualifiedGoIdent(protogen.GoIdent{
+		GoName:       "Direction",
+		GoImportPath: "cloud.google.com/go/firestore",
+	})
+
+	p.P(Comment(""),
+		"func (x *", c.TypeName(p.packageFirestoreType()), ") OrderBy(",
+		"path string, dir ", dirType,
+		")",
+		"*", c.TypeNameQuery(p.packageFirestoreType()),
+		" {")
+	p.P("return &", c.TypeNameQuery(p.packageFirestoreType()), "{")
+	p.P("q: x.c.OrderBy(path, dir),")
+	p.P("}")
+	p.P("}")
+	p.P()
+
+	p.P(Comment(""),
+		"func (x *", c.TypeNameQuery(p.packageFirestoreType()), ") OrderBy(",
+		"path string, dir ", dirType,
+		")",
+		"*", c.TypeNameQuery(p.packageFirestoreType()),
+		" {")
+	p.P("return &", c.TypeNameQuery(p.packageFirestoreType()), "{")
+	p.P("q: x.q.OrderBy(path, dir),")
+	p.P("}")
+	p.P("}")
+	p.P()
+}
+
+func (p *Package) genCollectionMethodLimit(c *Collection) {
+	p.P(Comment(""),
+		"func (x *", c.TypeName(p.packageFirestoreType()), ") Limit(",
+		"n int",
+		")",
+		"*", c.TypeNameQuery(p.packageFirestoreType()),
+		" {")
+	p.P("return &", c.TypeNameQuery(p.packageFirestoreType()), "{")
+	p.P("q: x.c.Limit(n),")
+	p.P("}")
+	p.P("}")
+	p.P()
+
+	p.P(Comment(""),
+		"func (x *", c.TypeNameQuery(p.packageFirestoreType()), ") Limit(",
+		"n int",
+		")",
+		"*", c.TypeNameQuery(p.packageFirestoreType()),
+		" {")
+	p.P("return &", c.TypeNameQuery(p.packageFirestoreType()), "{")
+	p.P("q: x.q.Limit(n),")
+	p.P("}")
+	p.P("}")
+	p.P()
+}
+
+func (p *Package) genCollectionMethodIterGetAll(c *Collection) {
+	snapType := p.out.QualifiedGoIdent(protogen.GoIdent{
+		GoName:       "DocumentSnapshot",
+		GoImportPath: "cloud.google.com/go/firestore",
+	})
+
+	p.P(Comment(""),
+		"func (x *", c.TypeNameIter(p.packageFirestoreType()), ") GetAll() (",
+		"[]*", c.Message.ProtoName(), ", ",
+		"error",
+		") {")
+
+	p.P("snaps, err := x.i.GetAll()")
+	p.P("if err != nil {")
+	p.P("return nil, err")
+	p.P("}")
+
+	p.P("protos := make([]*", c.Message.ProtoName(), ", len(snaps))")
+	p.P("for i, snap := range snaps {")
+	p.P("p := new(", c.Message.ProtoName(), ")")
+	p.P("if err := snap.DataTo(p); err != nil {")
+	p.P("return nil, err")
+	p.P("}")
+	p.P("protos[i] = p")
+	p.P("}") // for
+
+	p.P("return protos, nil")
+	p.P("}") // func
+	p.P()
+
+	p.P(Comment(""),
+		"func (x *", c.TypeNameIter(p.packageFirestoreType()), ") GetAllAsSnapshots() (",
+		"[]*", snapType, ", ",
+		"error",
+		") {")
+	p.P("return x.i.GetAll()")
+	p.P("}")
+	p.P()
+}
+
+func (p *Package) genCollectionMethodIterNext(c *Collection) {
+	snapType := p.out.QualifiedGoIdent(protogen.GoIdent{
+		GoName:       "DocumentSnapshot",
+		GoImportPath: "cloud.google.com/go/firestore",
+	})
+
+	p.P(Comment(""),
+		"func (x *", c.TypeNameIter(p.packageFirestoreType()), ") Next() (",
+		"*", c.Message.ProtoName(), ", ",
+		"error",
+		") {")
+	p.P("snap, err := x.i.Next()")
+	p.P("if err != nil {")
+	p.P("return nil, err")
+	p.P("}")
+
+	p.P("p := new(", c.Message.ProtoName(), ")")
+	p.P("if err := snap.DataTo(p); err != nil {")
+	p.P("return nil, err")
+	p.P("}")
+	p.P("return p, nil")
+
+	p.P("}") // func
+	p.P()
+
+	p.P(Comment(""),
+		"func (x *", c.TypeNameIter(p.packageFirestoreType()), ") NextAsSnapshot() (",
+		"*", snapType, ", ",
+		"error",
+		") {")
+	p.P("return x.i.Next()")
+	p.P("}")
+	p.P()
+
+}
+
+func (p *Package) genCollectionMethodIterStop(c *Collection) {
+	p.P(Comment(""),
+		"func (x *", c.TypeNameIter(p.packageFirestoreType()), ") Stop() {")
+	p.P("x.i.Stop()")
+	p.P("}")
+	p.P()
 }
 
 func (p *Package) genDocumentChainMethod(parent *Collection, doc *Document) {
@@ -321,6 +462,10 @@ func (c *Collection) TypeName(prefix string) string {
 
 func (c *Collection) TypeNameQuery(prefix string) string {
 	return c.TypeName(prefix) + "_Query"
+}
+
+func (c *Collection) TypeNameIter(prefix string) string {
+	return c.TypeName(prefix) + "_Iter"
 }
 
 func (c *Collection) ParentDocumentTypeName(prefix string) string {
