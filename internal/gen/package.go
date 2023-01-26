@@ -163,6 +163,7 @@ func (p *Package) genCollectionChainMethod(
 	p.genCollectionMethodIterStop(c)
 	p.genDocumentMethod(c)
 	p.genDocumentType(c)
+	p.genDocumentMethodGet(c)
 	p.genDocumentMethodSet(c)
 	p.genDocumentMethodDelete(c)
 	p.genDocumentMethodRef(c)
@@ -574,6 +575,52 @@ func (c *Collection) ParentDocumentTypeName(prefix string) string {
 		return prefix
 	}
 	return c.Parent.TypeName(prefix)
+}
+
+func (p *Package) genDocumentMethodGet(c *Collection) {
+	if c.Message == nil {
+		return
+	}
+
+	ctxType := p.out.QualifiedGoIdent(protogen.GoIdent{
+		GoName:       "Context",
+		GoImportPath: "context",
+	})
+
+	// refType := p.out.QualifiedGoIdent(protogen.GoIdent{
+	// 	GoName:       "DocumentRef",
+	// 	GoImportPath: "cloud.google.com/go/firestore",
+	// })
+
+	p.P(Comment(""),
+		"func (x *", c.NestedDocumentTypeName(p.packageFirestoreType()), ") ",
+		"Get(", "ctx ", ctxType, ") ",
+		// "*", c.NestedDocumentTypeName(p.packageFirestoreType()),
+		"(",
+		"*", c.Message.ProtoName(), ", error",
+		")",
+		" {")
+
+	{
+		p.P("snap, err := x.d.Get(ctx)")
+		p.P("if err != nil {")
+		p.P("return nil, err")
+		p.P("}")
+
+		p.P("o := new(", c.Message.CustomObjectName(), ")")
+		p.P("if err := snap.DataTo(o); err != nil {")
+		p.P("return nil, err")
+		p.P("}")
+
+		p.P("if p, err := o.ToProto(); err != nil {")
+		p.P("return nil, err")
+		p.P("} else {")
+		p.P("return p, nil")
+		p.P("}")
+	}
+
+	p.P("}")
+	p.P()
 }
 
 func (p *Package) genDocumentMethodSet(c *Collection) {

@@ -316,6 +316,22 @@ type FS_unlinked_Parents_Subparents_Items_Doc struct {
 	d *firestore.DocumentRef
 }
 
+func (x *FS_unlinked_Parents_Subparents_Items_Doc) Get(ctx context.Context) (*Item, error) {
+	snap, err := x.d.Get(ctx)
+	if err != nil {
+		return nil, err
+	}
+	o := new(FirestoreItem)
+	if err := snap.DataTo(o); err != nil {
+		return nil, err
+	}
+	if p, err := o.ToProto(); err != nil {
+		return nil, err
+	} else {
+		return p, nil
+	}
+}
+
 func (x *FS_unlinked_Parents_Subparents_Items_Doc) Set(ctx context.Context, m *Item) error {
 	fs, err := m.ToFirestore()
 	if err != nil {

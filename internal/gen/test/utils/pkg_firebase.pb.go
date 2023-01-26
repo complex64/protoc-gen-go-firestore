@@ -316,6 +316,22 @@ type FS_utils_Accounts_Users_Sessions_Doc struct {
 	d *firestore.DocumentRef
 }
 
+func (x *FS_utils_Accounts_Users_Sessions_Doc) Get(ctx context.Context) (*Session, error) {
+	snap, err := x.d.Get(ctx)
+	if err != nil {
+		return nil, err
+	}
+	o := new(FirestoreSession)
+	if err := snap.DataTo(o); err != nil {
+		return nil, err
+	}
+	if p, err := o.ToProto(); err != nil {
+		return nil, err
+	} else {
+		return p, nil
+	}
+}
+
 func (x *FS_utils_Accounts_Users_Sessions_Doc) Set(ctx context.Context, m *Session) error {
 	fs, err := m.ToFirestore()
 	if err != nil {
