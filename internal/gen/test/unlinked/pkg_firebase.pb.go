@@ -8,6 +8,8 @@ package unlinked
 import (
 	firestore "cloud.google.com/go/firestore"
 	context "context"
+	codes "google.golang.org/grpc/codes"
+	status "google.golang.org/grpc/status"
 )
 
 type FS_unlinked struct {
@@ -304,6 +306,22 @@ func (x *FS_unlinked_Parents_Subparents_Items_Iter) NextAsSnapshot() (*firestore
 
 func (x *FS_unlinked_Parents_Subparents_Items_Iter) Stop() {
 	x.i.Stop()
+}
+
+func (x *FS_unlinked_Parents_Subparents_Items) Create(ctx context.Context, p *Item) (*firestore.WriteResult, error) {
+	fs, err := p.ToFirestore()
+	if err != nil {
+		return nil, err
+	}
+	id := fs.Name
+	if id == "" {
+		return nil, status.Error(codes.InvalidArgument, "empty id")
+	}
+	res, err := x.c.Doc(id).Create(ctx, fs)
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
 }
 
 func (x *FS_unlinked_Parents_Subparents_Items) Doc(id string) *FS_unlinked_Parents_Subparents_Items_Doc {

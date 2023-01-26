@@ -5,7 +5,6 @@ option go_package = "github.com/complex64/protoc-gen-go-firestore/cmd/protoc-gen
 
 message Session {
   option (firestore.message) = {
-    enabled:true
     collection:"accounts/{id}/users/{id}/sessions"
   };
 

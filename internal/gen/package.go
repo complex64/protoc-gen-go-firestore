@@ -5,6 +5,7 @@ import (
 	"path"
 
 	"github.com/complex64/protoc-gen-go-firestore/internal/version"
+	orderedmap "github.com/wk8/go-ordered-map/v2"
 	"google.golang.org/protobuf/compiler/protogen"
 )
 
@@ -27,7 +28,7 @@ func (p *Packages) Collect(file *File) {
 			plugin:      p.plugin,
 			name:        name,
 			importPath:  file.proto.GoImportPath,
-			collections: map[string]*Collection{},
+			collections: orderedmap.New[string, *Collection](),
 		}
 		p.list[name].initOut(file)
 	}
@@ -53,17 +54,17 @@ type Package struct {
 	dirPrefix   string
 	importPath  protogen.GoImportPath
 	out         *protogen.GeneratedFile
-	collections map[string]*Collection
+	collections *orderedmap.OrderedMap[string, *Collection]
 }
 
-func (p *Package) CollectPath(pa *Path) {
-	if pa == nil || pa.Collection == nil {
+func (p *Package) CollectPath(add *Path) {
+	if add == nil || add.Collection == nil {
 		return
 	}
-	if existing, ok := p.collections[pa.Collection.Segment]; ok {
-		p.collections[pa.Collection.Segment] = existing.Merge(pa.Collection)
+	if existing, ok := p.collections.Get(add.Collection.Segment); ok {
+		p.collections.Set(add.Collection.Segment, existing.Merge(add.Collection))
 	} else {
-		p.collections[pa.Collection.Segment] = pa.Collection
+		p.collections.Set(add.Collection.Segment, add.Collection)
 	}
 }
 
@@ -135,10 +136,10 @@ func (p *Package) packageFirestoreType() string {
 
 func (p *Package) genCollectionChainMethods(
 	parent *Collection,
-	collections map[string]*Collection,
+	collections *orderedmap.OrderedMap[string, *Collection],
 ) {
-	for _, coll := range collections {
-		p.genCollectionChainMethod(parent, coll)
+	for pair := collections.Oldest(); pair != nil; pair = pair.Next() {
+		p.genCollectionChainMethod(parent, pair.Value)
 	}
 }
 
@@ -497,13 +498,18 @@ func (p *Package) genCollectionMethodCreate(c *Collection) {
 		GoImportPath: "cloud.google.com/go/firestore",
 	})
 
-	errType := p.out.QualifiedGoIdent(protogen.GoIdent{
+	statusErrType := p.out.QualifiedGoIdent(protogen.GoIdent{
+		GoName:       "Error",
+		GoImportPath: "google.golang.org/grpc/status",
+	})
+
+	codeType := p.out.QualifiedGoIdent(protogen.GoIdent{
 		GoName:       "InvalidArgument",
 		GoImportPath: "google.golang.org/grpc/codes",
 	})
 
 	p.P(Comment(""),
-		"func (x *", c.TypeNameQuery(p.packageFirestoreType()), ") ",
+		"func (x *", c.TypeName(p.packageFirestoreType()), ") ",
 		"Create(",
 		"ctx ", ctxType, ", ",
 		"p *", c.Message.ProtoName(),
@@ -514,12 +520,12 @@ func (p *Package) genCollectionMethodCreate(c *Collection) {
 	{
 		p.P("fs, err := p.ToFirestore()")
 		p.P("if err != nil {")
-		p.P("return err")
+		p.P("return nil, err")
 		p.P("}")
 
 		p.P("id := fs.", c.Message.idField.Name())
 		p.P("if id == \"\" {")
-		p.P(errType)
+		p.P("return nil, ", statusErrType, "(", codeType, ", \"empty id\")")
 		p.P("}")
 
 		p.P("res, err := x.c.Doc(id).Create(ctx, fs)")
@@ -572,25 +578,25 @@ func (p *Package) genCollectionMethodFirst(c *Collection) {
 }
 
 func (p *Package) genDocumentChainMethod(parent *Collection, doc *Document) {
-	if len(doc.Collections) > 0 {
+	if doc.Collections.Len() > 0 {
 		p.genCollectionChainMethods(parent, doc.Collections)
 	}
 }
 
-func (d *Document) TypeName(prefix string) string {
-	if d.Parent != nil {
-		return d.Parent.TypeName(prefix) + "_Doc"
+func (left *Document) TypeName(prefix string) string {
+	if left.Parent != nil {
+		return left.Parent.TypeName(prefix) + "_Doc"
 	}
 	return prefix + "_Doc"
 }
 
-func (c *Collection) NestedDocumentTypeName(prefix string) string {
-	return c.TypeName(prefix) + "_Doc"
+func (left *Collection) NestedDocumentTypeName(prefix string) string {
+	return left.TypeName(prefix) + "_Doc"
 }
 
-func (c *Collection) TypeName(prefix string) string {
+func (left *Collection) TypeName(prefix string) string {
 	t := ""
-	var cur = c
+	var cur = left
 	for {
 		if cur == nil {
 			if t == "" {
@@ -613,19 +619,19 @@ func (c *Collection) TypeName(prefix string) string {
 	}
 }
 
-func (c *Collection) TypeNameQuery(prefix string) string {
-	return c.TypeName(prefix) + "_Query"
+func (left *Collection) TypeNameQuery(prefix string) string {
+	return left.TypeName(prefix) + "_Query"
 }
 
-func (c *Collection) TypeNameIter(prefix string) string {
-	return c.TypeName(prefix) + "_Iter"
+func (left *Collection) TypeNameIter(prefix string) string {
+	return left.TypeName(prefix) + "_Iter"
 }
 
-func (c *Collection) ParentDocumentTypeName(prefix string) string {
-	if c.Parent == nil {
+func (left *Collection) ParentDocumentTypeName(prefix string) string {
+	if left.Parent == nil {
 		return prefix
 	}
-	return c.Parent.TypeName(prefix)
+	return left.Parent.TypeName(prefix)
 }
 
 func (p *Package) genDocumentMethodGet(c *Collection) {

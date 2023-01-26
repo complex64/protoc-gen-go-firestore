@@ -2,6 +2,8 @@ package gen
 
 import (
 	"strings"
+
+	orderedmap "github.com/wk8/go-ordered-map/v2"
 )
 
 func (m *Message) parseCollection() (*Path, error) {
@@ -21,7 +23,7 @@ func (m *Message) parseCollection() (*Path, error) {
 				Parent:  doc,
 			}
 			if doc != nil {
-				doc.Collections[coll.Segment] = coll
+				doc.Collections.Set(coll.Segment, coll)
 			}
 			if i == 0 {
 				root.Collection = coll
@@ -31,7 +33,7 @@ func (m *Message) parseCollection() (*Path, error) {
 			}
 		} else {
 			doc = &Document{
-				Collections: map[string]*Collection{},
+				Collections: orderedmap.New[string, *Collection](),
 				Parent:      coll,
 			}
 			coll.Document = doc
@@ -53,52 +55,81 @@ type Collection struct {
 	Message  *Message
 }
 
-func (c *Collection) Merge(right *Collection) *Collection {
-	if c == nil {
+func (left *Collection) Merge(right *Collection) *Collection {
+	if left == nil {
 		return right
 	}
 	if right == nil {
-		return c
+		return left
 	}
-	if c.Document == nil && right.Document != nil {
-		return right
+
+	if left.Segment != right.Segment {
+		panic("BUG")
 	}
-	if right.Document == nil && c.Document != nil {
-		return c
+	if left.Title != right.Title {
+		panic("BUG")
 	}
-	c.Document = c.Document.Merge(right.Document)
-	return c
+
+	merged := new(Collection)
+	merged.Segment = left.Segment
+	merged.Title = left.Title
+
+	if left.Message == nil {
+		merged.Message = right.Message
+	} else {
+		merged.Message = left.Message
+	}
+
+	if left.Document == nil && right.Document != nil {
+		merged.Document = right.Document
+	}
+	if right.Document == nil && left.Document != nil {
+		merged.Document = left.Document
+	}
+
+	merged.Document = left.Document.Merge(right.Document)
+	merged.Document.Parent = merged
+	return merged
 }
 
 type Document struct {
-	Collections map[string]*Collection
+	Collections *orderedmap.OrderedMap[string, *Collection]
 	Parent      *Collection
 }
 
-func (d *Document) Merge(right *Document) *Document {
-	if d == nil {
+func (left *Document) Merge(right *Document) *Document {
+	if left == nil {
 		return right
-	} else if right == nil {
-		return d
+	}
+	if right == nil {
+		return left
 	}
 
-	combined := map[string]*Collection{}
+	combined := orderedmap.New[string, *Collection]()
 
-	for seg, coll := range d.Collections {
-		if existing, ok := combined[seg]; !ok {
-			combined[seg] = coll
+	for pair := left.Collections.Oldest(); pair != nil; pair = pair.Next() {
+		if existing, ok := combined.Get(pair.Key); !ok {
+			combined.Set(pair.Key, pair.Value)
 		} else {
-			combined[seg] = combined[seg].Merge(existing)
+			combined.Set(pair.Key, pair.Value.Merge(existing))
 		}
 	}
 
-	for seg, coll := range right.Collections {
-		if existing, ok := combined[seg]; !ok {
-			combined[seg] = coll
+	for pair := right.Collections.Oldest(); pair != nil; pair = pair.Next() {
+		if existing, ok := combined.Get(pair.Key); !ok {
+			combined.Set(pair.Key, pair.Value)
 		} else {
-			combined[seg] = combined[seg].Merge(existing)
+			combined.Set(pair.Key, pair.Value.Merge(existing))
 		}
 	}
 
-	return &Document{Collections: combined}
+	merged := &Document{Collections: combined}
+
+	if left.Parent == nil {
+		merged.Parent = right.Parent
+	} else {
+		merged.Parent = left.Parent
+	}
+
+	return merged
 }

@@ -62,8 +62,15 @@ func (m *Message) initField(proto *protogen.Field) error {
 	if err != nil {
 		return err
 	}
+
+	if field.opts.Id {
+		if m.idField != nil {
+			panic("duplicate id field")
+		}
+		m.idField = field
+	}
+
 	m.fields = append(m.fields, field)
-	// if field.opts.
 	return nil
 }
 
@@ -171,7 +178,7 @@ func (m *Message) CollectionConstantName() string {
 
 func (m *Message) enabled() bool {
 	_, nested := m.file.nested[m.ProtoName()]
-	return m.opts.Enabled || m.file.Enabled() || nested
+	return m.opts.Enabled || m.opts.Collection != "" || m.file.Enabled() || nested
 }
 
 func (m *Message) Annotate(symbol string, loc protogen.Location) {

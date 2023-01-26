@@ -9,5 +9,7 @@ message Item {
     collection:"parents/{id}/subparents/{id}/items"
   };
 
-  string name = 1;
+  string name = 1 [
+    (firestore.field).id = true
+  ];
 }
