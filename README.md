@@ -42,7 +42,9 @@ Given:
 ```protobuf
 syntax = "proto3";
 package my.service.v1;
+
 import "firestore/options.proto";
+
 option go_package = "github.com/myorg/apis-go/pkg/my/service/v1;servicev1";
 
 message Account {
