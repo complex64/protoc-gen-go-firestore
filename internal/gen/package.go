@@ -161,6 +161,7 @@ func (p *Package) genCollectionChainMethod(
 	p.genCollectionMethodIterGetAll(c)
 	p.genCollectionMethodIterNext(c)
 	p.genCollectionMethodIterStop(c)
+	p.genCollectionMethodCreate(c)
 	p.genDocumentMethod(c)
 	p.genDocumentType(c)
 	p.genDocumentMethodGet(c)
@@ -481,6 +482,56 @@ func (p *Package) genCollectionMethodIterStop(c *Collection) {
 	p.P()
 }
 
+func (p *Package) genCollectionMethodCreate(c *Collection) {
+	if c.Message == nil || c.Message.idField == nil {
+		return
+	}
+
+	ctxType := p.out.QualifiedGoIdent(protogen.GoIdent{
+		GoName:       "Context",
+		GoImportPath: "context",
+	})
+
+	resultType := p.out.QualifiedGoIdent(protogen.GoIdent{
+		GoName:       "WriteResult",
+		GoImportPath: "cloud.google.com/go/firestore",
+	})
+
+	errType := p.out.QualifiedGoIdent(protogen.GoIdent{
+		GoName:       "InvalidArgument",
+		GoImportPath: "google.golang.org/grpc/codes",
+	})
+
+	p.P(Comment(""),
+		"func (x *", c.TypeNameQuery(p.packageFirestoreType()), ") ",
+		"Create(",
+		"ctx ", ctxType, ", ",
+		"p *", c.Message.ProtoName(),
+		") (",
+		"*", resultType, ", ",
+		"error",
+		") {")
+	{
+		p.P("fs, err := p.ToFirestore()")
+		p.P("if err != nil {")
+		p.P("return err")
+		p.P("}")
+
+		p.P("id := fs.", c.Message.idField.Name())
+		p.P("if id == \"\" {")
+		p.P(errType)
+		p.P("}")
+
+		p.P("res, err := x.c.Doc(id).Create(ctx, fs)")
+		p.P("if err != nil {")
+		p.P("return nil, err")
+		p.P("}")
+		p.P("return res, nil")
+	}
+	p.P("}") // func
+	p.P()
+}
+
 func (p *Package) genCollectionMethodFirst(c *Collection) {
 	if c.Message == nil {
 		return
@@ -587,11 +638,6 @@ func (p *Package) genDocumentMethodGet(c *Collection) {
 		GoImportPath: "context",
 	})
 
-	// refType := p.out.QualifiedGoIdent(protogen.GoIdent{
-	// 	GoName:       "DocumentRef",
-	// 	GoImportPath: "cloud.google.com/go/firestore",
-	// })
-
 	p.P(Comment(""),
 		"func (x *", c.NestedDocumentTypeName(p.packageFirestoreType()), ") ",
 		"Get(", "ctx ", ctxType, ") ",
@@ -644,7 +690,7 @@ func (p *Package) genDocumentMethodSet(c *Collection) {
 		" {")
 
 	p.P("fs, err := m.ToFirestore()")
-	p.P("if err  != nil {")
+	p.P("if err != nil {")
 	p.P("return err")
 	p.P("}")
 

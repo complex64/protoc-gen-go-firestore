@@ -52,4 +52,6 @@ message FieldOptions {
   // that the request is processed.
   // However, if the field value is non-zero it won't be saved.
   bool server_timestamp = 3;
+
+  bool id = 4;
 }

@@ -31,6 +31,8 @@ type Message struct {
 	opts   *firestorepb.MessageOptions
 	fields []*Field
 	path   *Path
+
+	idField *Field
 }
 
 func (m *Message) init() error {
@@ -61,6 +63,7 @@ func (m *Message) initField(proto *protogen.Field) error {
 		return err
 	}
 	m.fields = append(m.fields, field)
+	// if field.opts.
 	return nil
 }
 
