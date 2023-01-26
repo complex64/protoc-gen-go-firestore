@@ -6,25 +6,6 @@ Exploration into generating Firestore bindings for Go from your .proto files.
 
 ## Example
 
-Given:
-
-```protobuf
-syntax = "proto3";
-package my.service.v1;
-import "firestore/options.proto";
-option go_package = "github.com/myorg/apis-go/pkg/my/service/v1;servicev1";
-
-message Account {
-  option (firestore.message).collection = "accounts";
-  string name = 1;
-}
-
-message User {
-  option (firestore.message).collection = "accounts/{id}/users";
-  string name = 1;
-}
-```
-
 We generate a convenient API to read/write your protos from/to Firestore:
 
 ```go
@@ -54,4 +35,23 @@ func client() *firestore.Client {
 	return c
 }
 
+```
+
+Given:
+
+```protobuf
+syntax = "proto3";
+package my.service.v1;
+import "firestore/options.proto";
+option go_package = "github.com/myorg/apis-go/pkg/my/service/v1;servicev1";
+
+message Account {
+  option (firestore.message).collection = "accounts";
+  string name = 1;
+}
+
+message User {
+  option (firestore.message).collection = "accounts/{id}/users";
+  string name = 1;
+}
 ```
