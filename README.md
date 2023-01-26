@@ -3,3 +3,57 @@
 [![Tests](https://github.com/complex64/protoc-gen-go-firestore/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/complex64/protoc-gen-go-firestore/actions/workflows/tests.yml) [![Linters](https://github.com/complex64/protoc-gen-go-firestore/actions/workflows/linters.yml/badge.svg?branch=main)](https://github.com/complex64/protoc-gen-go-firestore/actions/workflows/linters.yml) [![Go Report Card](https://goreportcard.com/badge/github.com/complex64/protoc-gen-go-firestore)](https://goreportcard.com/report/github.com/complex64/protoc-gen-go-firestore) [![Maintainability](https://api.codeclimate.com/v1/badges/69739915a43041e34892/maintainability)](https://codeclimate.com/github/complex64/protoc-gen-go-firestore/maintainability) [![Go Reference](https://pkg.go.dev/badge/github.com/complex64/protoc-gen-go-firestore.svg)](https://pkg.go.dev/github.com/complex64/protoc-gen-go-firestore)
 
 Exploration into generating Firestore bindings for Go from your .proto files.
+
+## Example
+
+Given:
+
+```protobuf
+syntax = "proto3";
+package my.service.v1;
+import "firestore/options.proto";
+option go_package = "github.com/myorg/apis-go/pkg/my/service/v1;servicev1";
+
+message Account {
+  option (firestore.message).collection = "accounts";
+  string name = 1;
+}
+
+message User {
+  option (firestore.message).collection = "accounts/{id}/users";
+  string name = 1;
+}
+```
+
+We generate a convenient API to read/write your protos from/to Firestore:
+
+```go
+package main
+
+import (
+	"cloud.google.com/go/firestore"
+	servicev1 "github.com/myorg/apis-go/pkg/my/service/v1"
+)
+
+func main() {
+	ctx := context.Background()
+	client, err := firestore.NewClient(ctx, "project")
+	if err != nil {
+		panic(err)
+	}
+
+	account := &servicev1.Account{
+		Name: "myaccount",
+	}
+
+	err = servicev1.Firestore(client).
+		Accounts().
+		Doc("myid").
+		Set(ctx, account)
+
+	if err != nil {
+		panic(err)
+	}
+}
+
+```
