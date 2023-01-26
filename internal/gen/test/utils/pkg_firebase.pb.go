@@ -44,6 +44,10 @@ func (x *FS_utils_Accounts_Query) Documents(ctx context.Context) *FS_utils_Accou
 	}
 }
 
+func (x *FS_utils_Accounts_Query) Value() firestore.Query {
+	return x.q
+}
+
 func (x *FS_utils_Accounts) Where(path, op string, value interface{}) *FS_utils_Accounts_Query {
 	return &FS_utils_Accounts_Query{
 		q: x.c.Where(path, op, value),
@@ -118,6 +122,10 @@ func (x *FS_utils_Accounts_Users_Query) Documents(ctx context.Context) *FS_utils
 	}
 }
 
+func (x *FS_utils_Accounts_Users_Query) Value() firestore.Query {
+	return x.q
+}
+
 func (x *FS_utils_Accounts_Users) Where(path, op string, value interface{}) *FS_utils_Accounts_Users_Query {
 	return &FS_utils_Accounts_Users_Query{
 		q: x.c.Where(path, op, value),
@@ -170,7 +178,7 @@ type FS_utils_Accounts_Users_Doc struct {
 
 func (x *FS_utils_Accounts_Users_Doc) Sessions() *FS_utils_Accounts_Users_Sessions {
 	return &FS_utils_Accounts_Users_Sessions{
-		c: x.d.Collection("sessions"),
+		c: x.d.Collection(FirestoreCollectionSessions),
 	}
 }
 
@@ -190,6 +198,10 @@ func (x *FS_utils_Accounts_Users_Sessions_Query) Documents(ctx context.Context) 
 	return &FS_utils_Accounts_Users_Sessions_Iter{
 		i: x.q.Documents(ctx),
 	}
+}
+
+func (x *FS_utils_Accounts_Users_Sessions_Query) Value() firestore.Query {
+	return x.q
 }
 
 func (x *FS_utils_Accounts_Users_Sessions) Where(path, op string, value interface{}) *FS_utils_Accounts_Users_Sessions_Query {
@@ -235,11 +247,15 @@ func (x *FS_utils_Accounts_Users_Sessions_Query) First(ctx context.Context) (*Se
 	if err != nil {
 		return nil, err
 	}
-	p := new(Session)
-	if err := snap.DataTo(p); err != nil {
+	o := new(FirestoreSession)
+	if err := snap.DataTo(o); err != nil {
 		return nil, err
 	}
-	return p, nil
+	if p, err := o.ToProto(); err != nil {
+		return nil, err
+	} else {
+		return p, nil
+	}
 }
 
 func (x *FS_utils_Accounts_Users_Sessions_Iter) GetAll() ([]*Session, error) {
@@ -249,11 +265,15 @@ func (x *FS_utils_Accounts_Users_Sessions_Iter) GetAll() ([]*Session, error) {
 	}
 	protos := make([]*Session, len(snaps))
 	for i, snap := range snaps {
-		p := new(Session)
-		if err := snap.DataTo(p); err != nil {
+		o := new(FirestoreSession)
+		if err := snap.DataTo(o); err != nil {
 			return nil, err
 		}
-		protos[i] = p
+		if p, err := o.ToProto(); err != nil {
+			return nil, err
+		} else {
+			protos[i] = p
+		}
 	}
 	return protos, nil
 }
@@ -267,11 +287,15 @@ func (x *FS_utils_Accounts_Users_Sessions_Iter) Next() (*Session, error) {
 	if err != nil {
 		return nil, err
 	}
-	p := new(Session)
-	if err := snap.DataTo(p); err != nil {
+	o := new(FirestoreSession)
+	if err := snap.DataTo(o); err != nil {
 		return nil, err
 	}
-	return p, nil
+	if p, err := o.ToProto(); err != nil {
+		return nil, err
+	} else {
+		return p, nil
+	}
 }
 
 func (x *FS_utils_Accounts_Users_Sessions_Iter) NextAsSnapshot() (*firestore.DocumentSnapshot, error) {
@@ -301,4 +325,12 @@ func (x *FS_utils_Accounts_Users_Sessions_Doc) Set(ctx context.Context, m *Sessi
 		return err
 	}
 	return nil
+}
+
+func (x *FS_utils_Accounts_Users_Sessions_Doc) Delete(ctx context.Context, preconds ...firestore.Precondition) (*firestore.WriteResult, error) {
+	return x.d.Delete(ctx, preconds...)
+}
+
+func (x *FS_utils_Accounts_Users_Sessions_Doc) Ref() *firestore.DocumentRef {
+	return x.d
 }

@@ -44,6 +44,10 @@ func (x *FS_unlinked_Parents_Query) Documents(ctx context.Context) *FS_unlinked_
 	}
 }
 
+func (x *FS_unlinked_Parents_Query) Value() firestore.Query {
+	return x.q
+}
+
 func (x *FS_unlinked_Parents) Where(path, op string, value interface{}) *FS_unlinked_Parents_Query {
 	return &FS_unlinked_Parents_Query{
 		q: x.c.Where(path, op, value),
@@ -118,6 +122,10 @@ func (x *FS_unlinked_Parents_Subparents_Query) Documents(ctx context.Context) *F
 	}
 }
 
+func (x *FS_unlinked_Parents_Subparents_Query) Value() firestore.Query {
+	return x.q
+}
+
 func (x *FS_unlinked_Parents_Subparents) Where(path, op string, value interface{}) *FS_unlinked_Parents_Subparents_Query {
 	return &FS_unlinked_Parents_Subparents_Query{
 		q: x.c.Where(path, op, value),
@@ -170,7 +178,7 @@ type FS_unlinked_Parents_Subparents_Doc struct {
 
 func (x *FS_unlinked_Parents_Subparents_Doc) Items() *FS_unlinked_Parents_Subparents_Items {
 	return &FS_unlinked_Parents_Subparents_Items{
-		c: x.d.Collection("items"),
+		c: x.d.Collection(FirestoreCollectionItems),
 	}
 }
 
@@ -190,6 +198,10 @@ func (x *FS_unlinked_Parents_Subparents_Items_Query) Documents(ctx context.Conte
 	return &FS_unlinked_Parents_Subparents_Items_Iter{
 		i: x.q.Documents(ctx),
 	}
+}
+
+func (x *FS_unlinked_Parents_Subparents_Items_Query) Value() firestore.Query {
+	return x.q
 }
 
 func (x *FS_unlinked_Parents_Subparents_Items) Where(path, op string, value interface{}) *FS_unlinked_Parents_Subparents_Items_Query {
@@ -235,11 +247,15 @@ func (x *FS_unlinked_Parents_Subparents_Items_Query) First(ctx context.Context) 
 	if err != nil {
 		return nil, err
 	}
-	p := new(Item)
-	if err := snap.DataTo(p); err != nil {
+	o := new(FirestoreItem)
+	if err := snap.DataTo(o); err != nil {
 		return nil, err
 	}
-	return p, nil
+	if p, err := o.ToProto(); err != nil {
+		return nil, err
+	} else {
+		return p, nil
+	}
 }
 
 func (x *FS_unlinked_Parents_Subparents_Items_Iter) GetAll() ([]*Item, error) {
@@ -249,11 +265,15 @@ func (x *FS_unlinked_Parents_Subparents_Items_Iter) GetAll() ([]*Item, error) {
 	}
 	protos := make([]*Item, len(snaps))
 	for i, snap := range snaps {
-		p := new(Item)
-		if err := snap.DataTo(p); err != nil {
+		o := new(FirestoreItem)
+		if err := snap.DataTo(o); err != nil {
 			return nil, err
 		}
-		protos[i] = p
+		if p, err := o.ToProto(); err != nil {
+			return nil, err
+		} else {
+			protos[i] = p
+		}
 	}
 	return protos, nil
 }
@@ -267,11 +287,15 @@ func (x *FS_unlinked_Parents_Subparents_Items_Iter) Next() (*Item, error) {
 	if err != nil {
 		return nil, err
 	}
-	p := new(Item)
-	if err := snap.DataTo(p); err != nil {
+	o := new(FirestoreItem)
+	if err := snap.DataTo(o); err != nil {
 		return nil, err
 	}
-	return p, nil
+	if p, err := o.ToProto(); err != nil {
+		return nil, err
+	} else {
+		return p, nil
+	}
 }
 
 func (x *FS_unlinked_Parents_Subparents_Items_Iter) NextAsSnapshot() (*firestore.DocumentSnapshot, error) {
@@ -301,4 +325,12 @@ func (x *FS_unlinked_Parents_Subparents_Items_Doc) Set(ctx context.Context, m *I
 		return err
 	}
 	return nil
+}
+
+func (x *FS_unlinked_Parents_Subparents_Items_Doc) Delete(ctx context.Context, preconds ...firestore.Precondition) (*firestore.WriteResult, error) {
+	return x.d.Delete(ctx, preconds...)
+}
+
+func (x *FS_unlinked_Parents_Subparents_Items_Doc) Ref() *firestore.DocumentRef {
+	return x.d
 }
