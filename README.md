@@ -31,29 +31,27 @@ We generate a convenient API to read/write your protos from/to Firestore:
 package main
 
 import (
+	"context"
+
 	"cloud.google.com/go/firestore"
 	servicev1 "github.com/myorg/apis-go/pkg/my/service/v1"
 )
 
 func main() {
-	ctx := context.Background()
-	client, err := firestore.NewClient(ctx, "project")
-	if err != nil {
-		panic(err)
-	}
-
-	account := &servicev1.Account{
-		Name: "myaccount",
-	}
-
-	err = servicev1.Firestore(client).
+	servicev1.Firestore(client()).
 		Accounts().
 		Doc("myid").
-		Set(ctx, account)
+		Set(context.Background(), &servicev1.Account{
+			Name: "myaccount",
+		})
+}
 
+func client() *firestore.Client {
+	c, err := firestore.NewClient(context.Background(), "project")
 	if err != nil {
 		panic(err)
 	}
+	return c
 }
 
 ```
