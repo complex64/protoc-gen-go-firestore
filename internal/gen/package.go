@@ -547,6 +547,14 @@ func (p *Package) genCollectionMethodFirst(c *Collection) {
 		GoName:       "Context",
 		GoImportPath: "context",
 	})
+	doneType := p.out.QualifiedGoIdent(protogen.GoIdent{
+		GoName:       "Done",
+		GoImportPath: "google.golang.org/api/iterator",
+	})
+	errorsIsType := p.out.QualifiedGoIdent(protogen.GoIdent{
+		GoName:       "Is",
+		GoImportPath: "errors",
+	})
 
 	p.P(Comment(""),
 		"func (x *", c.TypeNameQuery(p.packageFirestoreType()), ") First(ctx ", ctxType, ") (",
@@ -559,6 +567,11 @@ func (p *Package) genCollectionMethodFirst(c *Collection) {
 
 	p.P("snap, err := iter.Next()")
 	p.P("if err != nil {")
+	{
+		p.P("if  ", errorsIsType, "(err, ", doneType, ") {")
+		p.P("return nil, nil")
+		p.P("}")
+	}
 	p.P("return nil, err")
 	p.P("}")
 
