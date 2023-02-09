@@ -49,9 +49,9 @@ func (p *Packages) Gen() error {
 }
 
 type Package struct {
-	plugin      *protogen.Plugin
-	name        string
-	dirPrefix   string
+	plugin *protogen.Plugin
+	name   string
+	// dirPrefix   string
 	importPath  protogen.GoImportPath
 	out         *protogen.GeneratedFile
 	collections *orderedmap.OrderedMap[string, *Collection]
