@@ -1,12 +1,31 @@
 syntax = "proto3";
 import "firestore/options.proto";
+import "google/protobuf/timestamp.proto";
 package utils;
-option go_package = "github.com/complex64/protoc-gen-go-firestore/cmd/protoc-gen-go-firestore/test/utils";
+option go_package = "github.com/complex64/protoc-gen-go-firestore/v2/cmd/protoc-gen-go-firestore/test/utils";
 
 message Account {
   option (firestore.message) = {
-    collection:"accounts"
+    collection:"accounts/{id}"
   };
 
   string name = 1;
+}
+
+
+message Manifest {
+  option (firestore.message).collection = "installations/{owner}/repositories/{repository}/manifests/{manifest}";
+
+  string id = 1 [(firestore.field).id = true];
+  string owner = 2;
+  string repository = 3;
+  google.protobuf.Timestamp create_time = 4 [(firestore.field).server_timestamp = true];
+}
+
+message Action {
+  option (firestore.message).collection = "installations/{owner}/repositories/{repository}/manifests/{manifest}/actions/{action}";
+
+  string id = 1 [(firestore.field).id = true];
+  bytes proto = 2;
+  google.protobuf.Timestamp create_time = 3 [(firestore.field).server_timestamp = true];
 }

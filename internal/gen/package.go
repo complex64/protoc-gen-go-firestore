@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"path"
 
-	"github.com/complex64/protoc-gen-go-firestore/internal/version"
-	orderedmap "github.com/wk8/go-ordered-map/v2"
+	"github.com/complex64/protoc-gen-go-firestore/v2/internal/gen/tree"
+	"github.com/complex64/protoc-gen-go-firestore/v2/internal/version"
 	"google.golang.org/protobuf/compiler/protogen"
 )
 
@@ -22,21 +22,25 @@ func NewPackages(plugin *protogen.Plugin) *Packages {
 }
 
 func (p *Packages) Collect(file *File) {
-	name := string(file.proto.GoPackageName)
-	if _, ok := p.list[name]; !ok {
-		p.list[name] = &Package{
-			plugin:      p.plugin,
-			name:        name,
-			importPath:  file.proto.GoImportPath,
-			collections: orderedmap.New[string, *Collection](),
+	pkgName := string(file.proto.GoPackageName)
+	if _, ok := p.list[pkgName]; !ok {
+		p.list[pkgName] = &Package{
+			plugin:     p.plugin,
+			name:       pkgName,
+			importPath: file.proto.GoImportPath,
+			tree:       new(tree.Tree[*Message]),
 		}
-		p.list[name].initOut(file)
+		p.list[pkgName].initOut(file)
 	}
-	pkg := p.list[name]
+	pkg := p.list[pkgName]
 
-	for msgName, msg := range file.msgs {
-		_ = msgName
-		pkg.CollectPath(msg.path)
+	for _, msg := range file.msgs {
+		if msg.opts.Collection == "" {
+			continue
+		}
+		if err := pkg.tree.Add(msg.opts.Collection, msg); err != nil {
+			panic(err)
+		}
 	}
 }
 
@@ -49,23 +53,11 @@ func (p *Packages) Gen() error {
 }
 
 type Package struct {
-	plugin *protogen.Plugin
-	name   string
-	// dirPrefix   string
-	importPath  protogen.GoImportPath
-	out         *protogen.GeneratedFile
-	collections *orderedmap.OrderedMap[string, *Collection]
-}
-
-func (p *Package) CollectPath(add *Path) {
-	if add == nil || add.Collection == nil {
-		return
-	}
-	if existing, ok := p.collections.Get(add.Collection.Segment); ok {
-		p.collections.Set(add.Collection.Segment, existing.Merge(add.Collection))
-	} else {
-		p.collections.Set(add.Collection.Segment, add.Collection)
-	}
+	plugin     *protogen.Plugin
+	name       string
+	importPath protogen.GoImportPath
+	out        *protogen.GeneratedFile
+	tree       *tree.Tree[*Message]
 }
 
 func (p *Package) initOut(file *File) {
@@ -79,7 +71,7 @@ func (p *Package) Gen() {
 	p.genHeader()
 	p.genPackage()
 	p.genFirestoreTypeAndMethod()
-	p.genCollectionChainMethods(nil, p.collections)
+	p.genCollectionChainMethods()
 }
 
 func (p *Package) genFirestoreTypeAndMethod() {
@@ -88,18 +80,15 @@ func (p *Package) genFirestoreTypeAndMethod() {
 		GoImportPath: "cloud.google.com/go/firestore",
 	})
 
-	firestoreType := p.packageFirestoreType()
 	p.P(Comment(""),
-		"type ", firestoreType, " struct {")
+		"type Firestore struct {")
 	p.P("client *", clientType)
 	p.P("}")
 	p.P()
 
 	p.P(Comment(""),
-		"func Firestore(client *", clientType, ") *", firestoreType, " {")
-	p.P("return &", firestoreType, "{")
-	p.P("client: client", ",")
-	p.P("}")
+		"func WithFirestore(client *", clientType, ") *Firestore {")
+	p.P("return &Firestore {client: client}")
 	p.P("}")
 	p.P()
 }
@@ -130,135 +119,155 @@ func (p *Package) genPackage() {
 
 func (p *Package) P(v ...interface{}) { p.out.P(v...) }
 
-func (p *Package) packageFirestoreType() string {
-	return "FS_" + p.name
+func (p *Package) genCollectionChainMethods() {
+	p.tree.Walk(func(parent *tree.Parent[*Message], collection string, msg *Message) {
+		p.genCollectionMethod(parent, collection, msg)
+		p.genCollectionMethodCreate(parent, collection, msg)
+		p.genCollectionMethodLimit(parent, collection, msg)
+		p.genCollectionMethodOrderBy(parent, collection, msg)
+		p.genCollectionMethodWhere(parent, collection)
+		p.genCollectionType(parent, collection)
+		p.genDocumentMethod(parent, collection)
+		p.genDocumentMethodDelete(parent, collection, msg)
+		p.genDocumentMethodGet(parent, collection, msg)
+		p.genDocumentMethodRef(parent, collection, msg)
+		p.genDocumentMethodSet(parent, collection, msg)
+		p.genDocumentType(parent, collection, msg)
+		p.genIteratorGetAll(parent, collection, msg)
+		p.genIteratorNext(parent, collection, msg)
+		p.genIteratorStop(parent, collection)
+		p.genIteratorType(parent, collection, msg)
+		p.genQueryMethodFirst(parent, collection, msg)
+		p.genQueryType(parent, collection, msg)
+		p.genQueryValue(parent, collection)
+	})
 }
 
-func (p *Package) genCollectionChainMethods(
-	parent *Collection,
-	collections *orderedmap.OrderedMap[string, *Collection],
-) {
-	for pair := collections.Oldest(); pair != nil; pair = pair.Next() {
-		p.genCollectionChainMethod(parent, pair.Value)
-	}
+func (p *Package) documentTypeName(parent *tree.Parent[*Message], collection string) string {
+	return p.typeName(parent, collection) + "DocumentRef"
 }
 
-func (p *Package) genCollectionChainMethod(
-	parent *Collection,
-	c *Collection,
-) {
-	if c == nil {
-		return
-	}
-	p.genCollectionMethod(c)
-	p.genCollectionType(c)
-	p.genCollectionTypeIterator(c)
-	p.genCollectionTypeQuery(c)
-	p.genCollectionMethodQueryValue(c)
-	p.genCollectionMethodWhere(c)
-	p.genCollectionMethodOrderBy(c)
-	p.genCollectionMethodLimit(c)
-	p.genCollectionMethodFirst(c)
-	p.genCollectionMethodIterGetAll(c)
-	p.genCollectionMethodIterNext(c)
-	p.genCollectionMethodIterStop(c)
-	p.genCollectionMethodCreate(c)
-	p.genDocumentMethod(c)
-	p.genDocumentType(c)
-	p.genDocumentMethodGet(c)
-	p.genDocumentMethodSet(c)
-	p.genDocumentMethodDelete(c)
-	p.genDocumentMethodRef(c)
-
-	if c.Document != nil {
-		p.genDocumentChainMethod(c, c.Document)
-	}
-}
-
-func (p *Package) genDocumentType(c *Collection) {
+func (p *Package) genDocumentType(parent *tree.Parent[*Message], coll string, m *Message) {
 	docType := p.out.QualifiedGoIdent(protogen.GoIdent{
 		GoName:       "DocumentRef",
 		GoImportPath: "cloud.google.com/go/firestore",
 	})
-
-	p.P(Comment(""),
-		"type ", c.NestedDocumentTypeName(p.packageFirestoreType()), " struct {")
-	p.P("d *", docType)
+	typeName := p.documentTypeName(parent, coll)
+	p.P(Comment("%s holds a reference to a Firestore document in collection `%s`.",
+		typeName,
+		coll,
+	),
+		"type ", typeName, " struct {")
+	p.P("doc *", docType)
 	p.P("}")
 	p.P()
 }
 
-func (p *Package) genDocumentMethod(c *Collection) {
+func (p *Package) genDocumentMethod(parent *tree.Parent[*Message], collection string) {
+	collTypeName := p.collectionTypeName(parent, collection)
+	docTypeName := p.documentTypeName(parent, collection)
 	p.P(Comment(""),
-		"func (x *", c.TypeName(p.packageFirestoreType()), ") ",
+		"func (ref *", collTypeName, ") ",
 		"Doc(id string)",
-		"*", c.NestedDocumentTypeName(p.packageFirestoreType()),
+		"*", docTypeName,
 		" {")
-	p.P("return &", c.NestedDocumentTypeName(p.packageFirestoreType()), " {")
-	p.P("d: x.c.Doc(id),")
+	p.P("return &", docTypeName, " {")
+	p.P("doc: ref.coll.Doc(id),")
 	p.P("}")
 	p.P("}")
 	p.P()
 }
 
-func (p *Package) genCollectionMethod(c *Collection) {
-	segment := "\"" + c.Segment + "\""
-	if c.Message != nil {
-		segment = c.Message.CollectionConstantName()
-	}
-
-	p.P(Comment(""),
-		"func (x *", c.ParentDocumentTypeName(p.packageFirestoreType()), ") ", c.Title, "()",
-		"*", c.TypeName(p.packageFirestoreType()),
-		" {")
-	p.P("return &", c.TypeName(p.packageFirestoreType()), "{")
-
-	if c.Parent == nil {
-		p.P("c: x.client.Collection(", segment, "),")
+func (p *Package) genCollectionMethod(parent *tree.Parent[*Message], collection string, msg *Message) {
+	collTypeName := p.collectionTypeName(parent, collection)
+	if parent == nil {
+		p.P(Comment(""),
+			"func (fs *Firestore)", title.String(collection), "()",
+			"*", collTypeName,
+			" {")
+		p.P("return &", collTypeName, "{")
+		if msg != nil {
+			p.P("coll: fs.client.Collection(", msg.CollectionConstantName(), "),")
+		} else {
+			p.P("coll: fs.client.Collection(\"", collection, "\"),")
+		}
+		p.P("}")
+		p.P("}")
 	} else {
-		p.P("c: x.d.Collection(", segment, "),")
+		p.P(Comment(""),
+			"func (ref *", p.documentTypeName(parent, collection), ")", title.String(collection), "()",
+			"*", collTypeName,
+			" {")
+		p.P("return &", collTypeName, "{")
+		if msg != nil {
+			p.P("coll: ref.doc.Collection(", msg.CollectionConstantName(), "),")
+		} else {
+			p.P("coll: ref.doc.Collection(\"", collection, "\"),")
+		}
+		p.P("}")
+		p.P("}")
 	}
-
-	p.P("}")
-	p.P("}")
-	p.P()
 }
 
-func (p *Package) genCollectionType(c *Collection) {
+func (p *Package) collectionTypeName(parent *tree.Parent[*Message], collection string) string {
+	return p.typeName(parent, collection) + "CollectionRef"
+}
+
+func (p *Package) queryTypeName(parent *tree.Parent[*Message], collection string) string {
+	return p.typeName(parent, collection) + "Query"
+}
+
+func (p *Package) iterTypeName(parent *tree.Parent[*Message], collection string) string {
+	return p.typeName(parent, collection) + "Iterator"
+}
+
+func (p *Package) typeName(_ *tree.Parent[*Message], collection string) string {
+	return "Firestore" + title.String(collection)
+}
+
+func (p *Package) genCollectionType(parent *tree.Parent[*Message], coll string) {
 	collType := p.out.QualifiedGoIdent(protogen.GoIdent{
 		GoName:       "CollectionRef",
 		GoImportPath: "cloud.google.com/go/firestore",
 	})
-
-	p.P(Comment(""),
-		"type ", c.TypeName(p.packageFirestoreType()), " struct {")
-	p.P("c *", collType)
+	typeName := p.collectionTypeName(parent, coll)
+	p.P(Comment("%s holds a reference to the Firestore collection `%s`.",
+		typeName,
+		coll,
+	),
+		"type ", typeName, " struct {")
+	p.P("coll *", collType)
 	p.P("}")
 	p.P()
 }
 
-func (p *Package) genCollectionTypeIterator(c *Collection) {
+func (p *Package) genIteratorType(parent *tree.Parent[*Message], collection string, msg *Message) {
 	iterType := p.out.QualifiedGoIdent(protogen.GoIdent{
 		GoName:       "DocumentIterator",
 		GoImportPath: "cloud.google.com/go/firestore",
 	})
 
+	iterTypeName := p.iterTypeName(parent, collection)
+
 	p.P(Comment(""),
-		"type ", c.TypeNameIter(p.packageFirestoreType()), " struct {")
-	p.P("i *", iterType)
+		"type ", iterTypeName, " struct {")
+	p.P("iter *", iterType)
 	p.P("}")
 	p.P()
 }
 
-func (p *Package) genCollectionTypeQuery(c *Collection) {
+func (p *Package) genQueryType(parent *tree.Parent[*Message], collection string, msg *Message) {
 	qType := p.out.QualifiedGoIdent(protogen.GoIdent{
 		GoName:       "Query",
 		GoImportPath: "cloud.google.com/go/firestore",
 	})
 
+	queryTypeName := p.queryTypeName(parent, collection)
+	iterTypeName := p.iterTypeName(parent, collection)
+
 	p.P(Comment(""),
-		"type ", c.TypeNameQuery(p.packageFirestoreType()), " struct {")
-	p.P("q ", qType)
+		"type ", queryTypeName, " struct {")
+	p.P("query ", qType)
 	p.P("}")
 	p.P()
 
@@ -268,118 +277,127 @@ func (p *Package) genCollectionTypeQuery(c *Collection) {
 	})
 
 	p.P(Comment(""),
-		"func (x *", c.TypeNameQuery(p.packageFirestoreType()), ") Documents(",
+		"func (q *", queryTypeName, ") Documents(",
 		"ctx ", ctxType,
 		")",
-		"*", c.TypeNameIter(p.packageFirestoreType()),
+		"*", iterTypeName,
 		" {")
-	p.P("return &", c.TypeNameIter(p.packageFirestoreType()), "{")
-	p.P("i: x.q.Documents(ctx),")
+	p.P("return &", iterTypeName, "{")
+	p.P("iter: q.query.Documents(ctx),")
 	p.P("}")
 	p.P("}")
 	p.P()
 }
 
-func (p *Package) genCollectionMethodQueryValue(c *Collection) {
+func (p *Package) genQueryValue(parent *tree.Parent[*Message], collection string) {
 	qType := p.out.QualifiedGoIdent(protogen.GoIdent{
 		GoName:       "Query",
 		GoImportPath: "cloud.google.com/go/firestore",
 	})
 
 	p.P(Comment(""),
-		"func (x *", c.TypeNameQuery(p.packageFirestoreType()), ") Value()",
+		"func (q *", p.queryTypeName(parent, collection), ") Value()",
 		qType,
 		" {")
-	p.P("return x.q")
+	p.P("return q.query")
 	p.P("}")
 	p.P()
 }
 
-func (p *Package) genCollectionMethodWhere(c *Collection) {
+func (p *Package) genCollectionMethodWhere(parent *tree.Parent[*Message], collection string) {
+	typeName := p.collectionTypeName(parent, collection)
+	queryTypeName := p.queryTypeName(parent, collection)
+
 	p.P(Comment(""),
-		"func (x *", c.TypeName(p.packageFirestoreType()), ") Where(",
+		"func (ref *", typeName, ") Where(",
 		"path, op string, value interface{}",
 		")",
-		"*", c.TypeNameQuery(p.packageFirestoreType()),
+		"*", queryTypeName,
 		" {")
-	p.P("return &", c.TypeNameQuery(p.packageFirestoreType()), "{")
-	p.P("q: x.c.Where(path, op, value),")
+	p.P("return &", queryTypeName, "{")
+	p.P("query: ref.coll.Where(path, op, value),")
 	p.P("}")
 	p.P("}")
 	p.P()
 
 	p.P(Comment(""),
-		"func (x *", c.TypeNameQuery(p.packageFirestoreType()), ") Where(",
+		"func (q *", queryTypeName, ") Where(",
 		"path, op string, value interface{}",
 		")",
-		"*", c.TypeNameQuery(p.packageFirestoreType()),
+		"*", queryTypeName,
 		" {")
-	p.P("return &", c.TypeNameQuery(p.packageFirestoreType()), "{")
-	p.P("q: x.q.Where(path, op, value),")
+	p.P("return &", queryTypeName, "{")
+	p.P("query: q.query.Where(path, op, value),")
 	p.P("}")
 	p.P("}")
 	p.P()
 }
 
-func (p *Package) genCollectionMethodOrderBy(c *Collection) {
+func (p *Package) genCollectionMethodOrderBy(parent *tree.Parent[*Message], collection string, msg *Message) {
 	dirType := p.out.QualifiedGoIdent(protogen.GoIdent{
 		GoName:       "Direction",
 		GoImportPath: "cloud.google.com/go/firestore",
 	})
 
+	typeName := p.collectionTypeName(parent, collection)
+	queryTypeName := p.queryTypeName(parent, collection)
+
 	p.P(Comment(""),
-		"func (x *", c.TypeName(p.packageFirestoreType()), ") OrderBy(",
+		"func (ref *", typeName, ") OrderBy(",
 		"path string, dir ", dirType,
 		")",
-		"*", c.TypeNameQuery(p.packageFirestoreType()),
+		"*", queryTypeName,
 		" {")
-	p.P("return &", c.TypeNameQuery(p.packageFirestoreType()), "{")
-	p.P("q: x.c.OrderBy(path, dir),")
+	p.P("return &", queryTypeName, "{")
+	p.P("query: ref.coll.OrderBy(path, dir),")
 	p.P("}")
 	p.P("}")
 	p.P()
 
 	p.P(Comment(""),
-		"func (x *", c.TypeNameQuery(p.packageFirestoreType()), ") OrderBy(",
+		"func (q *", queryTypeName, ") OrderBy(",
 		"path string, dir ", dirType,
 		")",
-		"*", c.TypeNameQuery(p.packageFirestoreType()),
+		"*", queryTypeName,
 		" {")
-	p.P("return &", c.TypeNameQuery(p.packageFirestoreType()), "{")
-	p.P("q: x.q.OrderBy(path, dir),")
+	p.P("return &", queryTypeName, "{")
+	p.P("query: q.query.OrderBy(path, dir),")
 	p.P("}")
 	p.P("}")
 	p.P()
 }
 
-func (p *Package) genCollectionMethodLimit(c *Collection) {
+func (p *Package) genCollectionMethodLimit(parent *tree.Parent[*Message], collection string, msg *Message) {
+	typeName := p.collectionTypeName(parent, collection)
+	queryTypeName := p.queryTypeName(parent, collection)
+
 	p.P(Comment(""),
-		"func (x *", c.TypeName(p.packageFirestoreType()), ") Limit(",
+		"func (ref *", typeName, ") Limit(",
 		"n int",
-		")",
-		"*", c.TypeNameQuery(p.packageFirestoreType()),
+		") ",
+		"*", queryTypeName,
 		" {")
-	p.P("return &", c.TypeNameQuery(p.packageFirestoreType()), "{")
-	p.P("q: x.c.Limit(n),")
+	p.P("return &", queryTypeName, "{")
+	p.P("query: ref.coll.Limit(n),")
 	p.P("}")
 	p.P("}")
 	p.P()
 
 	p.P(Comment(""),
-		"func (x *", c.TypeNameQuery(p.packageFirestoreType()), ") Limit(",
+		"func (q *", queryTypeName, ") Limit(",
 		"n int",
-		")",
-		"*", c.TypeNameQuery(p.packageFirestoreType()),
+		") ",
+		"*", queryTypeName,
 		" {")
-	p.P("return &", c.TypeNameQuery(p.packageFirestoreType()), "{")
-	p.P("q: x.q.Limit(n),")
+	p.P("return &", queryTypeName, "{")
+	p.P("query: q.query.Limit(n),")
 	p.P("}")
 	p.P("}")
 	p.P()
 }
 
-func (p *Package) genCollectionMethodIterGetAll(c *Collection) {
-	if c.Message == nil {
+func (p *Package) genIteratorGetAll(parent *tree.Parent[*Message], collection string, msg *Message) {
+	if msg == nil {
 		return
 	}
 
@@ -389,29 +407,29 @@ func (p *Package) genCollectionMethodIterGetAll(c *Collection) {
 	})
 
 	p.P(Comment(""),
-		"func (x *", c.TypeNameIter(p.packageFirestoreType()), ") GetAll() (",
-		"[]*", c.Message.ProtoName(), ", ",
+		"func (i *", p.iterTypeName(parent, collection), ") GetAll() (",
+		"[]*", msg.ProtoName(), ", ",
 		"error",
 		") {")
 
-	p.P("snaps, err := x.i.GetAll()")
+	p.P("snaps, err := i.iter.GetAll()")
 	p.P("if err != nil {")
 	p.P("return nil, err")
 	p.P("}")
 
-	p.P("protos := make([]*", c.Message.ProtoName(), ", len(snaps))")
+	p.P("protos := make([]*", msg.ProtoName(), ", len(snaps))")
 
-	p.P("for i, snap := range snaps {")
+	p.P("for j, snapshot := range snaps {")
 	{
-		p.P("o := new(", c.Message.CustomObjectName(), ")")
-		p.P("if err := snap.DataTo(o); err != nil {")
+		p.P("o := new(", msg.CustomObjectName(), ")")
+		p.P("if err := snapshot.DataTo(o); err != nil {")
 		p.P("return nil, err")
 		p.P("}")
 
 		p.P("if p, err := o.ToProto(); err != nil {")
 		p.P("return nil, err")
 		p.P("} else {")
-		p.P("protos[i] = p")
+		p.P("protos[j] = p")
 		p.P("}")
 	}
 	p.P("}")
@@ -421,17 +439,17 @@ func (p *Package) genCollectionMethodIterGetAll(c *Collection) {
 	p.P()
 
 	p.P(Comment(""),
-		"func (x *", c.TypeNameIter(p.packageFirestoreType()), ") GetAllAsSnapshots() (",
+		"func (i *", p.iterTypeName(parent, collection), ") GetAllAsSnapshots() (",
 		"[]*", snapType, ", ",
 		"error",
 		") {")
-	p.P("return x.i.GetAll()")
+	p.P("return i.iter.GetAll()")
 	p.P("}")
 	p.P()
 }
 
-func (p *Package) genCollectionMethodIterNext(c *Collection) {
-	if c.Message == nil {
+func (p *Package) genIteratorNext(parent *tree.Parent[*Message], collection string, msg *Message) {
+	if msg == nil {
 		return
 	}
 
@@ -441,21 +459,21 @@ func (p *Package) genCollectionMethodIterNext(c *Collection) {
 	})
 
 	p.P(Comment(""),
-		"func (x *", c.TypeNameIter(p.packageFirestoreType()), ") Next() (",
-		"*", c.Message.ProtoName(), ", ",
+		"func (i *", p.iterTypeName(parent, collection), ") Next() (",
+		"*", msg.ProtoName(), ", ",
 		"error",
 		") {")
-	p.P("snap, err := x.i.Next()")
+	p.P("snapshot, err := i.iter.Next()")
 	p.P("if err != nil {")
 	p.P("return nil, err")
 	p.P("}")
 
-	p.P("o := new(", c.Message.CustomObjectName(), ")")
-	p.P("if err := snap.DataTo(o); err != nil {")
+	p.P("obj := new(", msg.CustomObjectName(), ")")
+	p.P("if err := snapshot.DataTo(obj); err != nil {")
 	p.P("return nil, err")
 	p.P("}")
 
-	p.P("if p, err := o.ToProto(); err != nil {")
+	p.P("if p, err := obj.ToProto(); err != nil {")
 	p.P("return nil, err")
 	p.P("} else {")
 	p.P("return p, nil")
@@ -465,26 +483,25 @@ func (p *Package) genCollectionMethodIterNext(c *Collection) {
 	p.P()
 
 	p.P(Comment(""),
-		"func (x *", c.TypeNameIter(p.packageFirestoreType()), ") NextAsSnapshot() (",
+		"func (i *", p.iterTypeName(parent, collection), ") NextAsSnapshot() (",
 		"*", snapType, ", ",
 		"error",
 		") {")
-	p.P("return x.i.Next()")
+	p.P("return i.iter.Next()")
 	p.P("}")
 	p.P()
-
 }
 
-func (p *Package) genCollectionMethodIterStop(c *Collection) {
+func (p *Package) genIteratorStop(parent *tree.Parent[*Message], collection string) {
 	p.P(Comment(""),
-		"func (x *", c.TypeNameIter(p.packageFirestoreType()), ") Stop() {")
-	p.P("x.i.Stop()")
+		"func (i *", p.iterTypeName(parent, collection), ") Stop() {")
+	p.P("i.iter.Stop()")
 	p.P("}")
 	p.P()
 }
 
-func (p *Package) genCollectionMethodCreate(c *Collection) {
-	if c.Message == nil || c.Message.idField == nil {
+func (p *Package) genCollectionMethodCreate(parent *tree.Parent[*Message], collection string, msg *Message) {
+	if msg == nil || msg.idField == nil {
 		return
 	}
 
@@ -508,11 +525,13 @@ func (p *Package) genCollectionMethodCreate(c *Collection) {
 		GoImportPath: "google.golang.org/grpc/codes",
 	})
 
+	collTypeName := p.collectionTypeName(parent, collection)
+
 	p.P(Comment(""),
-		"func (x *", c.TypeName(p.packageFirestoreType()), ") ",
+		"func (ref *", collTypeName, ") ",
 		"Create(",
 		"ctx ", ctxType, ", ",
-		"p *", c.Message.ProtoName(),
+		"p *", msg.ProtoName(),
 		") (",
 		"*", resultType, ", ",
 		"error",
@@ -523,12 +542,12 @@ func (p *Package) genCollectionMethodCreate(c *Collection) {
 		p.P("return nil, err")
 		p.P("}")
 
-		p.P("id := fs.", c.Message.idField.Name())
+		p.P("id := fs.", msg.idField.Name())
 		p.P("if id == \"\" {")
 		p.P("return nil, ", statusErrType, "(", codeType, ", \"empty id\")")
 		p.P("}")
 
-		p.P("res, err := x.c.Doc(id).Create(ctx, fs)")
+		p.P("res, err := ref.coll.Doc(id).Create(ctx, fs)")
 		p.P("if err != nil {")
 		p.P("return nil, err")
 		p.P("}")
@@ -538,8 +557,8 @@ func (p *Package) genCollectionMethodCreate(c *Collection) {
 	p.P()
 }
 
-func (p *Package) genCollectionMethodFirst(c *Collection) {
-	if c.Message == nil {
+func (p *Package) genQueryMethodFirst(parent *tree.Parent[*Message], collection string, msg *Message) {
+	if msg == nil {
 		return
 	}
 
@@ -556,16 +575,18 @@ func (p *Package) genCollectionMethodFirst(c *Collection) {
 		GoImportPath: "errors",
 	})
 
+	queryTypeName := p.queryTypeName(parent, collection)
+
 	p.P(Comment(""),
-		"func (x *", c.TypeNameQuery(p.packageFirestoreType()), ") First(ctx ", ctxType, ") (",
-		"*", c.Message.ProtoName(), ", ",
+		"func (q *", queryTypeName, ") First(ctx ", ctxType, ") (",
+		"*", msg.ProtoName(), ", ",
 		"error",
 		") {")
 
-	p.P("iter := x.q.Limit(1).Documents(ctx)")
+	p.P("iter := q.query.Limit(1).Documents(ctx)")
 	p.P("defer iter.Stop()")
 
-	p.P("snap, err := iter.Next()")
+	p.P("snapshot, err := iter.Next()")
 	p.P("if err != nil {")
 	{
 		p.P("if  ", errorsIsType, "(err, ", doneType, ") {")
@@ -575,80 +596,23 @@ func (p *Package) genCollectionMethodFirst(c *Collection) {
 	p.P("return nil, err")
 	p.P("}")
 
-	p.P("o := new(", c.Message.CustomObjectName(), ")")
-	p.P("if err := snap.DataTo(o); err != nil {")
+	p.P("obj := new(", msg.CustomObjectName(), ")")
+	p.P("if err := snapshot.DataTo(obj); err != nil {")
 	p.P("return nil, err")
 	p.P("}")
 
-	p.P("if p, err := o.ToProto(); err != nil {")
+	p.P("if proto, err := obj.ToProto(); err != nil {")
 	p.P("return nil, err")
 	p.P("} else {")
-	p.P("return p, nil")
+	p.P("return proto, nil")
 	p.P("}")
 
 	p.P("}") // func
 	p.P()
 }
 
-func (p *Package) genDocumentChainMethod(parent *Collection, doc *Document) {
-	if doc.Collections.Len() > 0 {
-		p.genCollectionChainMethods(parent, doc.Collections)
-	}
-}
-
-func (left *Document) TypeName(prefix string) string {
-	if left.Parent != nil {
-		return left.Parent.TypeName(prefix) + "_Doc"
-	}
-	return prefix + "_Doc"
-}
-
-func (left *Collection) NestedDocumentTypeName(prefix string) string {
-	return left.TypeName(prefix) + "_Doc"
-}
-
-func (left *Collection) TypeName(prefix string) string {
-	t := ""
-	var cur = left
-	for {
-		if cur == nil {
-			if t == "" {
-				return prefix
-			}
-			return prefix + "_" + t
-		}
-
-		if t == "" {
-			t = cur.Title
-		} else {
-			t = cur.Title + "_" + t
-		}
-
-		if cur.Parent != nil && cur.Parent.Parent != nil {
-			cur = cur.Parent.Parent
-		} else {
-			cur = nil
-		}
-	}
-}
-
-func (left *Collection) TypeNameQuery(prefix string) string {
-	return left.TypeName(prefix) + "_Query"
-}
-
-func (left *Collection) TypeNameIter(prefix string) string {
-	return left.TypeName(prefix) + "_Iter"
-}
-
-func (left *Collection) ParentDocumentTypeName(prefix string) string {
-	if left.Parent == nil {
-		return prefix
-	}
-	return left.Parent.TypeName(prefix)
-}
-
-func (p *Package) genDocumentMethodGet(c *Collection) {
-	if c.Message == nil {
+func (p *Package) genDocumentMethodGet(parent *tree.Parent[*Message], collection string, msg *Message) {
+	if msg == nil {
 		return
 	}
 
@@ -658,29 +622,28 @@ func (p *Package) genDocumentMethodGet(c *Collection) {
 	})
 
 	p.P(Comment(""),
-		"func (x *", c.NestedDocumentTypeName(p.packageFirestoreType()), ") ",
+		"func (ref *", p.documentTypeName(parent, collection), ") ",
 		"Get(", "ctx ", ctxType, ") ",
-		// "*", c.NestedDocumentTypeName(p.packageFirestoreType()),
 		"(",
-		"*", c.Message.ProtoName(), ", error",
+		"*", msg.ProtoName(), ", error",
 		")",
 		" {")
 
 	{
-		p.P("snap, err := x.d.Get(ctx)")
+		p.P("snapshot, err := ref.doc.Get(ctx)")
 		p.P("if err != nil {")
 		p.P("return nil, err")
 		p.P("}")
 
-		p.P("o := new(", c.Message.CustomObjectName(), ")")
-		p.P("if err := snap.DataTo(o); err != nil {")
+		p.P("obj := new(", msg.CustomObjectName(), ")")
+		p.P("if err := snapshot.DataTo(obj); err != nil {")
 		p.P("return nil, err")
 		p.P("}")
 
-		p.P("if p, err := o.ToProto(); err != nil {")
+		p.P("if proto, err := obj.ToProto(); err != nil {")
 		p.P("return nil, err")
 		p.P("} else {")
-		p.P("return p, nil")
+		p.P("return proto, nil")
 		p.P("}")
 	}
 
@@ -688,8 +651,8 @@ func (p *Package) genDocumentMethodGet(c *Collection) {
 	p.P()
 }
 
-func (p *Package) genDocumentMethodSet(c *Collection) {
-	if c.Message == nil {
+func (p *Package) genDocumentMethodSet(parent *tree.Parent[*Message], collection string, msg *Message) {
+	if msg == nil {
 		return
 	}
 
@@ -699,21 +662,20 @@ func (p *Package) genDocumentMethodSet(c *Collection) {
 	})
 
 	p.P(Comment(""),
-		"func (x *", c.NestedDocumentTypeName(p.packageFirestoreType()), ") ",
+		"func (ref *", p.documentTypeName(parent, collection), ") ",
 		"Set(",
 		"ctx ", ctxType, ", ",
-		"m *", c.Message.ProtoName(),
+		"msg *", msg.ProtoName(),
 		") ",
-		// "*", c.NestedDocumentTypeName(p.packageFirestoreType()),
 		"error ",
 		" {")
 
-	p.P("fs, err := m.ToFirestore()")
+	p.P("fs, err := msg.ToFirestore()")
 	p.P("if err != nil {")
 	p.P("return err")
 	p.P("}")
 
-	p.P("if _, err := x.d.Set(ctx, ", "fs); err != nil {")
+	p.P("if _, err := ref.doc.Set(ctx, fs); err != nil {")
 	p.P("return err")
 	p.P("}")
 
@@ -722,8 +684,8 @@ func (p *Package) genDocumentMethodSet(c *Collection) {
 	p.P()
 }
 
-func (p *Package) genDocumentMethodDelete(c *Collection) {
-	if c.Message == nil {
+func (p *Package) genDocumentMethodDelete(parent *tree.Parent[*Message], collection string, msg *Message) {
+	if msg == nil {
 		return
 	}
 
@@ -743,7 +705,7 @@ func (p *Package) genDocumentMethodDelete(c *Collection) {
 	})
 
 	p.P(Comment(""),
-		"func (x *", c.NestedDocumentTypeName(p.packageFirestoreType()), ") ",
+		"func (ref *", p.documentTypeName(parent, collection), ") ",
 		"Delete(",
 		"ctx ", ctxType, ", ",
 		"preconds ...", preconType,
@@ -751,13 +713,13 @@ func (p *Package) genDocumentMethodDelete(c *Collection) {
 		"(*", resultType, ", error) ",
 		" {")
 
-	p.P("return x.d.Delete(ctx, preconds...)")
+	p.P("return ref.doc.Delete(ctx, preconds...)")
 	p.P("}")
 	p.P()
 }
 
-func (p *Package) genDocumentMethodRef(c *Collection) {
-	if c.Message == nil {
+func (p *Package) genDocumentMethodRef(parent *tree.Parent[*Message], collection string, msg *Message) {
+	if msg == nil {
 		return
 	}
 
@@ -767,11 +729,11 @@ func (p *Package) genDocumentMethodRef(c *Collection) {
 	})
 
 	p.P(Comment(""),
-		"func (x *", c.NestedDocumentTypeName(p.packageFirestoreType()), ") ",
+		"func (ref *", p.documentTypeName(parent, collection), ") ",
 		"Ref() ",
 		"*", refType,
 		" {")
-	p.P("return x.d")
+	p.P("return ref.doc")
 	p.P("}")
 	p.P()
 }

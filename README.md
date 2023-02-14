@@ -48,12 +48,12 @@ import "firestore/options.proto";
 option go_package = "github.com/myorg/apis-go/pkg/my/service/v1;servicev1";
 
 message Account {
-  option (firestore.message).collection = "accounts";
+  option (firestore.message).collection = "accounts/{id}";
   string name = 1;
 }
 
 message User {
-  option (firestore.message).collection = "accounts/{id}/users";
+  option (firestore.message).collection = "accounts/{id}/users/{id}";
   string name = 1;
 }
 ```

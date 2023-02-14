@@ -2,7 +2,7 @@ syntax = "proto3";
 import "firestore/options.proto";
 import "google/protobuf/timestamp.proto";
 package converter;
-option go_package = "github.com/complex64/protoc-gen-go-firestore/cmd/protoc-gen-go-firestore/test/converter";
+option go_package = "github.com/complex64/protoc-gen-go-firestore/v2/cmd/protoc-gen-go-firestore/test/converter";
 
 // Expect generation of converter methods that map back and forth between Protobufs and Firestore Custom Objects.
 

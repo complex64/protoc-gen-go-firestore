@@ -6,8 +6,8 @@ import (
 	"testing"
 
 	"github.com/complex64/protoc-gen-go-firestore/firestorepb"
-	"github.com/complex64/protoc-gen-go-firestore/internal/gen/test/options"
-	"github.com/complex64/protoc-gen-go-firestore/internal/require"
+	"github.com/complex64/protoc-gen-go-firestore/v2/internal/gen/test/options"
+	"github.com/complex64/protoc-gen-go-firestore/v2/internal/require"
 )
 
 // Test that all options in the .proto file are present as expected.

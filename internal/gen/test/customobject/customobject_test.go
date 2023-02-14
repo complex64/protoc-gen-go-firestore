@@ -4,8 +4,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/complex64/protoc-gen-go-firestore/internal/gen/test/customobject"
-	"github.com/complex64/protoc-gen-go-firestore/internal/require"
+	"github.com/complex64/protoc-gen-go-firestore/v2/internal/gen/test/customobject"
+	"github.com/complex64/protoc-gen-go-firestore/v2/internal/require"
 )
 
 func TestCustomObjectStructTypeGeneration(t *testing.T) {

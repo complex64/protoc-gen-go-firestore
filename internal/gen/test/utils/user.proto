@@ -1,11 +1,11 @@
 syntax = "proto3";
 import "firestore/options.proto";
 package utils;
-option go_package = "github.com/complex64/protoc-gen-go-firestore/cmd/protoc-gen-go-firestore/test/utils";
+option go_package = "github.com/complex64/protoc-gen-go-firestore/v2/cmd/protoc-gen-go-firestore/test/utils";
 
 message User {
   option (firestore.message) = {
-    collection:"accounts/{id}/users"
+    collection:"accounts/{id}/users/{id}"
   };
 
   string name = 1 [

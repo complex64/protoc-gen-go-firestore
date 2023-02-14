@@ -1,11 +1,11 @@
 syntax = "proto3";
 import "firestore/options.proto";
 package utils;
-option go_package = "github.com/complex64/protoc-gen-go-firestore/cmd/protoc-gen-go-firestore/test/utils";
+option go_package = "github.com/complex64/protoc-gen-go-firestore/v2/cmd/protoc-gen-go-firestore/test/utils";
 
 message Session {
   option (firestore.message) = {
-    collection:"accounts/{id}/users/{id}/sessions"
+    collection:"accounts/{id}/users/{id}/sessions/{id}"
   };
 
   string uuid = 1;

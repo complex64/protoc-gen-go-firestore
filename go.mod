@@ -1,4 +1,4 @@
-module github.com/complex64/protoc-gen-go-firestore
+module github.com/complex64/protoc-gen-go-firestore/v2
 
 go 1.19
 
@@ -8,7 +8,6 @@ require (
 	github.com/google/go-cmp v0.5.9
 	github.com/rs/zerolog v1.29.0
 	github.com/stretchr/testify v1.8.1
-	github.com/wk8/go-ordered-map/v2 v2.1.5
 	golang.org/x/text v0.7.0
 	google.golang.org/api v0.103.0
 	google.golang.org/grpc v1.53.0
@@ -20,14 +19,11 @@ require (
 	cloud.google.com/go/compute v1.15.1 // indirect
 	cloud.google.com/go/compute/metadata v0.2.3 // indirect
 	cloud.google.com/go/longrunning v0.3.0 // indirect
-	github.com/bahlo/generic-list-go v0.2.0 // indirect
-	github.com/buger/jsonparser v1.1.1 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/golang/groupcache v0.0.0-20200121045136-8c9f03a8e57e // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.2.0 // indirect
 	github.com/googleapis/gax-go/v2 v2.7.0 // indirect
-	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/mattn/go-colorable v0.1.12 // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
