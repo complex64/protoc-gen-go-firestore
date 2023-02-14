@@ -195,7 +195,7 @@ func (p *Package) genCollectionMethod(parent *tree.Parent[*Message], collection 
 		p.P("}")
 	} else {
 		p.P(Comment(""),
-			"func (ref *", p.documentTypeName(parent, collection), ")", title.String(collection), "()",
+			"func (ref *", p.documentTypeName(parent, parent.Name), ")", title.String(collection), "()",
 			"*", collTypeName,
 			" {")
 		p.P("return &", collTypeName, "{")

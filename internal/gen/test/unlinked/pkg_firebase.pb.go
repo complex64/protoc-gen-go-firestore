@@ -101,7 +101,7 @@ func (q *FirestoreParentsQuery) Value() firestore.Query {
 	return q.query
 }
 
-func (ref *FirestoreSubparentsDocumentRef) Subparents() *FirestoreSubparentsCollectionRef {
+func (ref *FirestoreParentsDocumentRef) Subparents() *FirestoreSubparentsCollectionRef {
 	return &FirestoreSubparentsCollectionRef{
 		coll: ref.doc.Collection("subparents"),
 	}
@@ -180,7 +180,7 @@ func (q *FirestoreSubparentsQuery) Value() firestore.Query {
 	return q.query
 }
 
-func (ref *FirestoreItemsDocumentRef) Items() *FirestoreItemsCollectionRef {
+func (ref *FirestoreSubparentsDocumentRef) Items() *FirestoreItemsCollectionRef {
 	return &FirestoreItemsCollectionRef{
 		coll: ref.doc.Collection(FirestoreCollectionItems),
 	}

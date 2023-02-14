@@ -201,7 +201,7 @@ func (q *FirestoreAccountsQuery) Value() firestore.Query {
 	return q.query
 }
 
-func (ref *FirestoreUsersDocumentRef) Users() *FirestoreUsersCollectionRef {
+func (ref *FirestoreAccountsDocumentRef) Users() *FirestoreUsersCollectionRef {
 	return &FirestoreUsersCollectionRef{
 		coll: ref.doc.Collection(FirestoreCollectionUsers),
 	}
@@ -396,7 +396,7 @@ func (q *FirestoreUsersQuery) Value() firestore.Query {
 	return q.query
 }
 
-func (ref *FirestoreSessionsDocumentRef) Sessions() *FirestoreSessionsCollectionRef {
+func (ref *FirestoreUsersDocumentRef) Sessions() *FirestoreSessionsCollectionRef {
 	return &FirestoreSessionsCollectionRef{
 		coll: ref.doc.Collection(FirestoreCollectionSessions),
 	}
@@ -654,7 +654,7 @@ func (q *FirestoreInstallationsQuery) Value() firestore.Query {
 	return q.query
 }
 
-func (ref *FirestoreRepositoriesDocumentRef) Repositories() *FirestoreRepositoriesCollectionRef {
+func (ref *FirestoreInstallationsDocumentRef) Repositories() *FirestoreRepositoriesCollectionRef {
 	return &FirestoreRepositoriesCollectionRef{
 		coll: ref.doc.Collection("repositories"),
 	}
@@ -733,7 +733,7 @@ func (q *FirestoreRepositoriesQuery) Value() firestore.Query {
 	return q.query
 }
 
-func (ref *FirestoreManifestsDocumentRef) Manifests() *FirestoreManifestsCollectionRef {
+func (ref *FirestoreRepositoriesDocumentRef) Manifests() *FirestoreManifestsCollectionRef {
 	return &FirestoreManifestsCollectionRef{
 		coll: ref.doc.Collection(FirestoreCollectionManifests),
 	}
@@ -928,7 +928,7 @@ func (q *FirestoreManifestsQuery) Value() firestore.Query {
 	return q.query
 }
 
-func (ref *FirestoreActionsDocumentRef) Actions() *FirestoreActionsCollectionRef {
+func (ref *FirestoreManifestsDocumentRef) Actions() *FirestoreActionsCollectionRef {
 	return &FirestoreActionsCollectionRef{
 		coll: ref.doc.Collection(FirestoreCollectionActions),
 	}
