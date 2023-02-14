@@ -5,7 +5,7 @@ option go_package = "github.com/complex64/protoc-gen-go-firestore/cmd/protoc-gen
 
 message User {
   option (firestore.message) = {
-    collection:"accounts/{id}/users"
+    collection:"accounts/{id}/users/{id}"
   };
 
   string name = 1 [

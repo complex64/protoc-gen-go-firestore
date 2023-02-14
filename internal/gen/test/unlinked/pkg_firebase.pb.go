@@ -14,306 +14,178 @@ import (
 	status "google.golang.org/grpc/status"
 )
 
-type FS_unlinked struct {
+type Firestore struct {
 	client *firestore.Client
 }
 
-func Firestore(client *firestore.Client) *FS_unlinked {
-	return &FS_unlinked{
-		client: client,
+func WithFirestore(client *firestore.Client) *Firestore {
+	return &Firestore{client: client}
+}
+
+func (fs *Firestore) Parents() *FirestoreParentsCollectionRef {
+	return &FirestoreParentsCollectionRef{
+		coll: fs.client.Collection("parents"),
+	}
+}
+func (ref *FirestoreParentsCollectionRef) Limit(n int) *FirestoreParentsQuery {
+	return &FirestoreParentsQuery{
+		query: ref.coll.Limit(n),
 	}
 }
 
-func (x *FS_unlinked) Parents() *FS_unlinked_Parents {
-	return &FS_unlinked_Parents{
-		c: x.client.Collection("parents"),
+func (q *FirestoreParentsQuery) Limit(n int) *FirestoreParentsQuery {
+	return &FirestoreParentsQuery{
+		query: q.query.Limit(n),
 	}
 }
 
-type FS_unlinked_Parents struct {
-	c *firestore.CollectionRef
-}
-
-type FS_unlinked_Parents_Iter struct {
-	i *firestore.DocumentIterator
-}
-
-type FS_unlinked_Parents_Query struct {
-	q firestore.Query
-}
-
-func (x *FS_unlinked_Parents_Query) Documents(ctx context.Context) *FS_unlinked_Parents_Iter {
-	return &FS_unlinked_Parents_Iter{
-		i: x.q.Documents(ctx),
+func (ref *FirestoreParentsCollectionRef) OrderBy(path string, dir firestore.Direction) *FirestoreParentsQuery {
+	return &FirestoreParentsQuery{
+		query: ref.coll.OrderBy(path, dir),
 	}
 }
 
-func (x *FS_unlinked_Parents_Query) Value() firestore.Query {
-	return x.q
-}
-
-func (x *FS_unlinked_Parents) Where(path, op string, value interface{}) *FS_unlinked_Parents_Query {
-	return &FS_unlinked_Parents_Query{
-		q: x.c.Where(path, op, value),
+func (q *FirestoreParentsQuery) OrderBy(path string, dir firestore.Direction) *FirestoreParentsQuery {
+	return &FirestoreParentsQuery{
+		query: q.query.OrderBy(path, dir),
 	}
 }
 
-func (x *FS_unlinked_Parents_Query) Where(path, op string, value interface{}) *FS_unlinked_Parents_Query {
-	return &FS_unlinked_Parents_Query{
-		q: x.q.Where(path, op, value),
+func (ref *FirestoreParentsCollectionRef) Where(path, op string, value interface{}) *FirestoreParentsQuery {
+	return &FirestoreParentsQuery{
+		query: ref.coll.Where(path, op, value),
 	}
 }
 
-func (x *FS_unlinked_Parents) OrderBy(path string, dir firestore.Direction) *FS_unlinked_Parents_Query {
-	return &FS_unlinked_Parents_Query{
-		q: x.c.OrderBy(path, dir),
+func (q *FirestoreParentsQuery) Where(path, op string, value interface{}) *FirestoreParentsQuery {
+	return &FirestoreParentsQuery{
+		query: q.query.Where(path, op, value),
 	}
 }
 
-func (x *FS_unlinked_Parents_Query) OrderBy(path string, dir firestore.Direction) *FS_unlinked_Parents_Query {
-	return &FS_unlinked_Parents_Query{
-		q: x.q.OrderBy(path, dir),
+// FirestoreParentsCollectionRef holds a reference to the Firestore collection `parents`.
+type FirestoreParentsCollectionRef struct {
+	coll *firestore.CollectionRef
+}
+
+func (ref *FirestoreParentsCollectionRef) Doc(id string) *FirestoreParentsDocumentRef {
+	return &FirestoreParentsDocumentRef{
+		doc: ref.coll.Doc(id),
 	}
 }
 
-func (x *FS_unlinked_Parents) Limit(n int) *FS_unlinked_Parents_Query {
-	return &FS_unlinked_Parents_Query{
-		q: x.c.Limit(n),
+// FirestoreParentsDocumentRef holds a reference to a Firestore document in collection `parents`.
+type FirestoreParentsDocumentRef struct {
+	doc *firestore.DocumentRef
+}
+
+func (i *FirestoreParentsIterator) Stop() {
+	i.iter.Stop()
+}
+
+type FirestoreParentsIterator struct {
+	iter *firestore.DocumentIterator
+}
+
+type FirestoreParentsQuery struct {
+	query firestore.Query
+}
+
+func (q *FirestoreParentsQuery) Documents(ctx context.Context) *FirestoreParentsIterator {
+	return &FirestoreParentsIterator{
+		iter: q.query.Documents(ctx),
 	}
 }
 
-func (x *FS_unlinked_Parents_Query) Limit(n int) *FS_unlinked_Parents_Query {
-	return &FS_unlinked_Parents_Query{
-		q: x.q.Limit(n),
+func (q *FirestoreParentsQuery) Value() firestore.Query {
+	return q.query
+}
+
+func (ref *FirestoreSubparentsDocumentRef) Subparents() *FirestoreSubparentsCollectionRef {
+	return &FirestoreSubparentsCollectionRef{
+		coll: ref.doc.Collection("subparents"),
+	}
+}
+func (ref *FirestoreSubparentsCollectionRef) Limit(n int) *FirestoreSubparentsQuery {
+	return &FirestoreSubparentsQuery{
+		query: ref.coll.Limit(n),
 	}
 }
 
-func (x *FS_unlinked_Parents_Iter) Stop() {
-	x.i.Stop()
-}
-
-func (x *FS_unlinked_Parents) Doc(id string) *FS_unlinked_Parents_Doc {
-	return &FS_unlinked_Parents_Doc{
-		d: x.c.Doc(id),
+func (q *FirestoreSubparentsQuery) Limit(n int) *FirestoreSubparentsQuery {
+	return &FirestoreSubparentsQuery{
+		query: q.query.Limit(n),
 	}
 }
 
-type FS_unlinked_Parents_Doc struct {
-	d *firestore.DocumentRef
-}
-
-func (x *FS_unlinked_Parents_Doc) Subparents() *FS_unlinked_Parents_Subparents {
-	return &FS_unlinked_Parents_Subparents{
-		c: x.d.Collection("subparents"),
+func (ref *FirestoreSubparentsCollectionRef) OrderBy(path string, dir firestore.Direction) *FirestoreSubparentsQuery {
+	return &FirestoreSubparentsQuery{
+		query: ref.coll.OrderBy(path, dir),
 	}
 }
 
-type FS_unlinked_Parents_Subparents struct {
-	c *firestore.CollectionRef
-}
-
-type FS_unlinked_Parents_Subparents_Iter struct {
-	i *firestore.DocumentIterator
-}
-
-type FS_unlinked_Parents_Subparents_Query struct {
-	q firestore.Query
-}
-
-func (x *FS_unlinked_Parents_Subparents_Query) Documents(ctx context.Context) *FS_unlinked_Parents_Subparents_Iter {
-	return &FS_unlinked_Parents_Subparents_Iter{
-		i: x.q.Documents(ctx),
+func (q *FirestoreSubparentsQuery) OrderBy(path string, dir firestore.Direction) *FirestoreSubparentsQuery {
+	return &FirestoreSubparentsQuery{
+		query: q.query.OrderBy(path, dir),
 	}
 }
 
-func (x *FS_unlinked_Parents_Subparents_Query) Value() firestore.Query {
-	return x.q
-}
-
-func (x *FS_unlinked_Parents_Subparents) Where(path, op string, value interface{}) *FS_unlinked_Parents_Subparents_Query {
-	return &FS_unlinked_Parents_Subparents_Query{
-		q: x.c.Where(path, op, value),
+func (ref *FirestoreSubparentsCollectionRef) Where(path, op string, value interface{}) *FirestoreSubparentsQuery {
+	return &FirestoreSubparentsQuery{
+		query: ref.coll.Where(path, op, value),
 	}
 }
 
-func (x *FS_unlinked_Parents_Subparents_Query) Where(path, op string, value interface{}) *FS_unlinked_Parents_Subparents_Query {
-	return &FS_unlinked_Parents_Subparents_Query{
-		q: x.q.Where(path, op, value),
+func (q *FirestoreSubparentsQuery) Where(path, op string, value interface{}) *FirestoreSubparentsQuery {
+	return &FirestoreSubparentsQuery{
+		query: q.query.Where(path, op, value),
 	}
 }
 
-func (x *FS_unlinked_Parents_Subparents) OrderBy(path string, dir firestore.Direction) *FS_unlinked_Parents_Subparents_Query {
-	return &FS_unlinked_Parents_Subparents_Query{
-		q: x.c.OrderBy(path, dir),
+// FirestoreSubparentsCollectionRef holds a reference to the Firestore collection `subparents`.
+type FirestoreSubparentsCollectionRef struct {
+	coll *firestore.CollectionRef
+}
+
+func (ref *FirestoreSubparentsCollectionRef) Doc(id string) *FirestoreSubparentsDocumentRef {
+	return &FirestoreSubparentsDocumentRef{
+		doc: ref.coll.Doc(id),
 	}
 }
 
-func (x *FS_unlinked_Parents_Subparents_Query) OrderBy(path string, dir firestore.Direction) *FS_unlinked_Parents_Subparents_Query {
-	return &FS_unlinked_Parents_Subparents_Query{
-		q: x.q.OrderBy(path, dir),
+// FirestoreSubparentsDocumentRef holds a reference to a Firestore document in collection `subparents`.
+type FirestoreSubparentsDocumentRef struct {
+	doc *firestore.DocumentRef
+}
+
+func (i *FirestoreSubparentsIterator) Stop() {
+	i.iter.Stop()
+}
+
+type FirestoreSubparentsIterator struct {
+	iter *firestore.DocumentIterator
+}
+
+type FirestoreSubparentsQuery struct {
+	query firestore.Query
+}
+
+func (q *FirestoreSubparentsQuery) Documents(ctx context.Context) *FirestoreSubparentsIterator {
+	return &FirestoreSubparentsIterator{
+		iter: q.query.Documents(ctx),
 	}
 }
 
-func (x *FS_unlinked_Parents_Subparents) Limit(n int) *FS_unlinked_Parents_Subparents_Query {
-	return &FS_unlinked_Parents_Subparents_Query{
-		q: x.c.Limit(n),
+func (q *FirestoreSubparentsQuery) Value() firestore.Query {
+	return q.query
+}
+
+func (ref *FirestoreItemsDocumentRef) Items() *FirestoreItemsCollectionRef {
+	return &FirestoreItemsCollectionRef{
+		coll: ref.doc.Collection(FirestoreCollectionItems),
 	}
 }
-
-func (x *FS_unlinked_Parents_Subparents_Query) Limit(n int) *FS_unlinked_Parents_Subparents_Query {
-	return &FS_unlinked_Parents_Subparents_Query{
-		q: x.q.Limit(n),
-	}
-}
-
-func (x *FS_unlinked_Parents_Subparents_Iter) Stop() {
-	x.i.Stop()
-}
-
-func (x *FS_unlinked_Parents_Subparents) Doc(id string) *FS_unlinked_Parents_Subparents_Doc {
-	return &FS_unlinked_Parents_Subparents_Doc{
-		d: x.c.Doc(id),
-	}
-}
-
-type FS_unlinked_Parents_Subparents_Doc struct {
-	d *firestore.DocumentRef
-}
-
-func (x *FS_unlinked_Parents_Subparents_Doc) Items() *FS_unlinked_Parents_Subparents_Items {
-	return &FS_unlinked_Parents_Subparents_Items{
-		c: x.d.Collection(FirestoreCollectionItems),
-	}
-}
-
-type FS_unlinked_Parents_Subparents_Items struct {
-	c *firestore.CollectionRef
-}
-
-type FS_unlinked_Parents_Subparents_Items_Iter struct {
-	i *firestore.DocumentIterator
-}
-
-type FS_unlinked_Parents_Subparents_Items_Query struct {
-	q firestore.Query
-}
-
-func (x *FS_unlinked_Parents_Subparents_Items_Query) Documents(ctx context.Context) *FS_unlinked_Parents_Subparents_Items_Iter {
-	return &FS_unlinked_Parents_Subparents_Items_Iter{
-		i: x.q.Documents(ctx),
-	}
-}
-
-func (x *FS_unlinked_Parents_Subparents_Items_Query) Value() firestore.Query {
-	return x.q
-}
-
-func (x *FS_unlinked_Parents_Subparents_Items) Where(path, op string, value interface{}) *FS_unlinked_Parents_Subparents_Items_Query {
-	return &FS_unlinked_Parents_Subparents_Items_Query{
-		q: x.c.Where(path, op, value),
-	}
-}
-
-func (x *FS_unlinked_Parents_Subparents_Items_Query) Where(path, op string, value interface{}) *FS_unlinked_Parents_Subparents_Items_Query {
-	return &FS_unlinked_Parents_Subparents_Items_Query{
-		q: x.q.Where(path, op, value),
-	}
-}
-
-func (x *FS_unlinked_Parents_Subparents_Items) OrderBy(path string, dir firestore.Direction) *FS_unlinked_Parents_Subparents_Items_Query {
-	return &FS_unlinked_Parents_Subparents_Items_Query{
-		q: x.c.OrderBy(path, dir),
-	}
-}
-
-func (x *FS_unlinked_Parents_Subparents_Items_Query) OrderBy(path string, dir firestore.Direction) *FS_unlinked_Parents_Subparents_Items_Query {
-	return &FS_unlinked_Parents_Subparents_Items_Query{
-		q: x.q.OrderBy(path, dir),
-	}
-}
-
-func (x *FS_unlinked_Parents_Subparents_Items) Limit(n int) *FS_unlinked_Parents_Subparents_Items_Query {
-	return &FS_unlinked_Parents_Subparents_Items_Query{
-		q: x.c.Limit(n),
-	}
-}
-
-func (x *FS_unlinked_Parents_Subparents_Items_Query) Limit(n int) *FS_unlinked_Parents_Subparents_Items_Query {
-	return &FS_unlinked_Parents_Subparents_Items_Query{
-		q: x.q.Limit(n),
-	}
-}
-
-func (x *FS_unlinked_Parents_Subparents_Items_Query) First(ctx context.Context) (*Item, error) {
-	iter := x.q.Limit(1).Documents(ctx)
-	defer iter.Stop()
-	snap, err := iter.Next()
-	if err != nil {
-		if errors.Is(err, iterator.Done) {
-			return nil, nil
-		}
-		return nil, err
-	}
-	o := new(FirestoreItem)
-	if err := snap.DataTo(o); err != nil {
-		return nil, err
-	}
-	if p, err := o.ToProto(); err != nil {
-		return nil, err
-	} else {
-		return p, nil
-	}
-}
-
-func (x *FS_unlinked_Parents_Subparents_Items_Iter) GetAll() ([]*Item, error) {
-	snaps, err := x.i.GetAll()
-	if err != nil {
-		return nil, err
-	}
-	protos := make([]*Item, len(snaps))
-	for i, snap := range snaps {
-		o := new(FirestoreItem)
-		if err := snap.DataTo(o); err != nil {
-			return nil, err
-		}
-		if p, err := o.ToProto(); err != nil {
-			return nil, err
-		} else {
-			protos[i] = p
-		}
-	}
-	return protos, nil
-}
-
-func (x *FS_unlinked_Parents_Subparents_Items_Iter) GetAllAsSnapshots() ([]*firestore.DocumentSnapshot, error) {
-	return x.i.GetAll()
-}
-
-func (x *FS_unlinked_Parents_Subparents_Items_Iter) Next() (*Item, error) {
-	snap, err := x.i.Next()
-	if err != nil {
-		return nil, err
-	}
-	o := new(FirestoreItem)
-	if err := snap.DataTo(o); err != nil {
-		return nil, err
-	}
-	if p, err := o.ToProto(); err != nil {
-		return nil, err
-	} else {
-		return p, nil
-	}
-}
-
-func (x *FS_unlinked_Parents_Subparents_Items_Iter) NextAsSnapshot() (*firestore.DocumentSnapshot, error) {
-	return x.i.Next()
-}
-
-func (x *FS_unlinked_Parents_Subparents_Items_Iter) Stop() {
-	x.i.Stop()
-}
-
-func (x *FS_unlinked_Parents_Subparents_Items) Create(ctx context.Context, p *Item) (*firestore.WriteResult, error) {
+func (ref *FirestoreItemsCollectionRef) Create(ctx context.Context, p *Item) (*firestore.WriteResult, error) {
 	fs, err := p.ToFirestore()
 	if err != nil {
 		return nil, err
@@ -322,54 +194,183 @@ func (x *FS_unlinked_Parents_Subparents_Items) Create(ctx context.Context, p *It
 	if id == "" {
 		return nil, status.Error(codes.InvalidArgument, "empty id")
 	}
-	res, err := x.c.Doc(id).Create(ctx, fs)
+	res, err := ref.coll.Doc(id).Create(ctx, fs)
 	if err != nil {
 		return nil, err
 	}
 	return res, nil
 }
 
-func (x *FS_unlinked_Parents_Subparents_Items) Doc(id string) *FS_unlinked_Parents_Subparents_Items_Doc {
-	return &FS_unlinked_Parents_Subparents_Items_Doc{
-		d: x.c.Doc(id),
+func (ref *FirestoreItemsCollectionRef) Limit(n int) *FirestoreItemsQuery {
+	return &FirestoreItemsQuery{
+		query: ref.coll.Limit(n),
 	}
 }
 
-type FS_unlinked_Parents_Subparents_Items_Doc struct {
-	d *firestore.DocumentRef
+func (q *FirestoreItemsQuery) Limit(n int) *FirestoreItemsQuery {
+	return &FirestoreItemsQuery{
+		query: q.query.Limit(n),
+	}
 }
 
-func (x *FS_unlinked_Parents_Subparents_Items_Doc) Get(ctx context.Context) (*Item, error) {
-	snap, err := x.d.Get(ctx)
+func (ref *FirestoreItemsCollectionRef) OrderBy(path string, dir firestore.Direction) *FirestoreItemsQuery {
+	return &FirestoreItemsQuery{
+		query: ref.coll.OrderBy(path, dir),
+	}
+}
+
+func (q *FirestoreItemsQuery) OrderBy(path string, dir firestore.Direction) *FirestoreItemsQuery {
+	return &FirestoreItemsQuery{
+		query: q.query.OrderBy(path, dir),
+	}
+}
+
+func (ref *FirestoreItemsCollectionRef) Where(path, op string, value interface{}) *FirestoreItemsQuery {
+	return &FirestoreItemsQuery{
+		query: ref.coll.Where(path, op, value),
+	}
+}
+
+func (q *FirestoreItemsQuery) Where(path, op string, value interface{}) *FirestoreItemsQuery {
+	return &FirestoreItemsQuery{
+		query: q.query.Where(path, op, value),
+	}
+}
+
+// FirestoreItemsCollectionRef holds a reference to the Firestore collection `items`.
+type FirestoreItemsCollectionRef struct {
+	coll *firestore.CollectionRef
+}
+
+func (ref *FirestoreItemsCollectionRef) Doc(id string) *FirestoreItemsDocumentRef {
+	return &FirestoreItemsDocumentRef{
+		doc: ref.coll.Doc(id),
+	}
+}
+
+func (ref *FirestoreItemsDocumentRef) Delete(ctx context.Context, preconds ...firestore.Precondition) (*firestore.WriteResult, error) {
+	return ref.doc.Delete(ctx, preconds...)
+}
+
+func (ref *FirestoreItemsDocumentRef) Get(ctx context.Context) (*Item, error) {
+	snapshot, err := ref.doc.Get(ctx)
 	if err != nil {
 		return nil, err
 	}
-	o := new(FirestoreItem)
-	if err := snap.DataTo(o); err != nil {
+	obj := new(FirestoreItem)
+	if err := snapshot.DataTo(obj); err != nil {
 		return nil, err
 	}
-	if p, err := o.ToProto(); err != nil {
+	if proto, err := obj.ToProto(); err != nil {
+		return nil, err
+	} else {
+		return proto, nil
+	}
+}
+
+func (ref *FirestoreItemsDocumentRef) Ref() *firestore.DocumentRef {
+	return ref.doc
+}
+
+func (ref *FirestoreItemsDocumentRef) Set(ctx context.Context, msg *Item) error {
+	fs, err := msg.ToFirestore()
+	if err != nil {
+		return err
+	}
+	if _, err := ref.doc.Set(ctx, fs); err != nil {
+		return err
+	}
+	return nil
+}
+
+// FirestoreItemsDocumentRef holds a reference to a Firestore document in collection `items`.
+type FirestoreItemsDocumentRef struct {
+	doc *firestore.DocumentRef
+}
+
+func (i *FirestoreItemsIterator) GetAll() ([]*Item, error) {
+	snaps, err := i.iter.GetAll()
+	if err != nil {
+		return nil, err
+	}
+	protos := make([]*Item, len(snaps))
+	for j, snapshot := range snaps {
+		o := new(FirestoreItem)
+		if err := snapshot.DataTo(o); err != nil {
+			return nil, err
+		}
+		if p, err := o.ToProto(); err != nil {
+			return nil, err
+		} else {
+			protos[j] = p
+		}
+	}
+	return protos, nil
+}
+
+func (i *FirestoreItemsIterator) GetAllAsSnapshots() ([]*firestore.DocumentSnapshot, error) {
+	return i.iter.GetAll()
+}
+
+func (i *FirestoreItemsIterator) Next() (*Item, error) {
+	snapshot, err := i.iter.Next()
+	if err != nil {
+		return nil, err
+	}
+	obj := new(FirestoreItem)
+	if err := snapshot.DataTo(obj); err != nil {
+		return nil, err
+	}
+	if p, err := obj.ToProto(); err != nil {
 		return nil, err
 	} else {
 		return p, nil
 	}
 }
 
-func (x *FS_unlinked_Parents_Subparents_Items_Doc) Set(ctx context.Context, m *Item) error {
-	fs, err := m.ToFirestore()
+func (i *FirestoreItemsIterator) NextAsSnapshot() (*firestore.DocumentSnapshot, error) {
+	return i.iter.Next()
+}
+
+func (i *FirestoreItemsIterator) Stop() {
+	i.iter.Stop()
+}
+
+type FirestoreItemsIterator struct {
+	iter *firestore.DocumentIterator
+}
+
+func (q *FirestoreItemsQuery) First(ctx context.Context) (*Item, error) {
+	iter := q.query.Limit(1).Documents(ctx)
+	defer iter.Stop()
+	snapshot, err := iter.Next()
 	if err != nil {
-		return err
+		if errors.Is(err, iterator.Done) {
+			return nil, nil
+		}
+		return nil, err
 	}
-	if _, err := x.d.Set(ctx, fs); err != nil {
-		return err
+	obj := new(FirestoreItem)
+	if err := snapshot.DataTo(obj); err != nil {
+		return nil, err
 	}
-	return nil
+	if proto, err := obj.ToProto(); err != nil {
+		return nil, err
+	} else {
+		return proto, nil
+	}
 }
 
-func (x *FS_unlinked_Parents_Subparents_Items_Doc) Delete(ctx context.Context, preconds ...firestore.Precondition) (*firestore.WriteResult, error) {
-	return x.d.Delete(ctx, preconds...)
+type FirestoreItemsQuery struct {
+	query firestore.Query
 }
 
-func (x *FS_unlinked_Parents_Subparents_Items_Doc) Ref() *firestore.DocumentRef {
-	return x.d
+func (q *FirestoreItemsQuery) Documents(ctx context.Context) *FirestoreItemsIterator {
+	return &FirestoreItemsIterator{
+		iter: q.query.Documents(ctx),
+	}
+}
+
+func (q *FirestoreItemsQuery) Value() firestore.Query {
+	return q.query
 }

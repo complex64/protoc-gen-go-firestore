@@ -9,12 +9,10 @@ import (
 	firestore "cloud.google.com/go/firestore"
 )
 
-type FS_customobject struct {
+type Firestore struct {
 	client *firestore.Client
 }
 
-func Firestore(client *firestore.Client) *FS_customobject {
-	return &FS_customobject{
-		client: client,
-	}
+func WithFirestore(client *firestore.Client) *Firestore {
+	return &Firestore{client: client}
 }

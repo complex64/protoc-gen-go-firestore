@@ -2,7 +2,7 @@ package gen
 
 import (
 	"fmt"
-	"path"
+	"strings"
 
 	"github.com/complex64/protoc-gen-go-firestore/firestorepb"
 	"github.com/rs/zerolog/log"
@@ -30,14 +30,12 @@ type Message struct {
 
 	opts   *firestorepb.MessageOptions
 	fields []*Field
-	path   *Path
 
 	idField *Field
 }
 
 func (m *Message) init() error {
 	m.initOpts()
-	m.initCollectionPath()
 	if err := m.initFields(); err != nil {
 		return err
 	}
@@ -86,18 +84,6 @@ func (m *Message) initOpts() {
 	}
 }
 
-func (m *Message) initCollectionPath() {
-	if m.opts.Collection == "" {
-		return
-	}
-
-	p, err := m.parseCollection()
-	if err != nil {
-		log.Fatal().Msg(err.Error())
-	}
-	m.path = p
-}
-
 // Gen generates GORM models and supporting APIs.
 func (m *Message) Gen() {
 	log.Trace().
@@ -112,7 +98,6 @@ func (m *Message) Gen() {
 	m.genCollectionNameConstant()
 	m.genCustomObjectStructType()
 	m.genConverterMethods()
-	m.genUtilityMethods()
 }
 
 func (m *Message) genCollectionNameConstant() {
@@ -196,8 +181,8 @@ func init() {
 }
 
 func (m *Message) CollectionName() string {
-	_, coll := path.Split(m.opts.Collection)
-	return coll
+	split := strings.Split(m.opts.Collection, "/")
+	return split[len(split)-2]
 }
 
 func (m *Message) CollectionNameTitle() string {

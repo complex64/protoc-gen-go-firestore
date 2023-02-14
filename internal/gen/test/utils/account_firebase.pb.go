@@ -8,7 +8,41 @@ package utils
 
 import (
 	_ "github.com/complex64/protoc-gen-go-firestore/firestorepb"
+	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
+	time "time"
 )
+
+// FirestoreCollectionActions is the Firestore collection name for documents of type utils.Action.
+const FirestoreCollectionActions = "actions"
+
+// FirestoreAction is the Firestore Custom Object for utils.Action.
+type FirestoreAction struct {
+	Id         string    `firestore:"id,omitempty"`
+	Proto      []byte    `firestore:"proto,omitempty"`
+	CreateTime time.Time `firestore:"createTime,serverTimestamp"`
+}
+
+// ToProto converts this FirestoreAction to its protobuf representation.
+func (m *FirestoreAction) ToProto() (*Action, error) {
+	x := new(Action)
+	x.Id = m.Id
+	x.Proto = m.Proto
+	if m.CreateTime != (time.Time{}) {
+		x.CreateTime = timestamppb.New(m.CreateTime)
+	}
+	return x, nil
+}
+
+// ToFirestore returns the Firestore Custom Object for Action.
+func (x *Action) ToFirestore() (*FirestoreAction, error) {
+	m := new(FirestoreAction)
+	m.Id = x.Id
+	m.Proto = x.Proto
+	if t := x.CreateTime; t != nil {
+		m.CreateTime = t.AsTime()
+	}
+	return m, nil
+}
 
 // FirestoreCollectionAccounts is the Firestore collection name for documents of type utils.Account.
 const FirestoreCollectionAccounts = "accounts"
@@ -29,5 +63,40 @@ func (m *FirestoreAccount) ToProto() (*Account, error) {
 func (x *Account) ToFirestore() (*FirestoreAccount, error) {
 	m := new(FirestoreAccount)
 	m.Name = x.Name
+	return m, nil
+}
+
+// FirestoreCollectionManifests is the Firestore collection name for documents of type utils.Manifest.
+const FirestoreCollectionManifests = "manifests"
+
+// FirestoreManifest is the Firestore Custom Object for utils.Manifest.
+type FirestoreManifest struct {
+	Id         string    `firestore:"id,omitempty"`
+	Owner      string    `firestore:"owner,omitempty"`
+	Repository string    `firestore:"repository,omitempty"`
+	CreateTime time.Time `firestore:"createTime,serverTimestamp"`
+}
+
+// ToProto converts this FirestoreManifest to its protobuf representation.
+func (m *FirestoreManifest) ToProto() (*Manifest, error) {
+	x := new(Manifest)
+	x.Id = m.Id
+	x.Owner = m.Owner
+	x.Repository = m.Repository
+	if m.CreateTime != (time.Time{}) {
+		x.CreateTime = timestamppb.New(m.CreateTime)
+	}
+	return x, nil
+}
+
+// ToFirestore returns the Firestore Custom Object for Manifest.
+func (x *Manifest) ToFirestore() (*FirestoreManifest, error) {
+	m := new(FirestoreManifest)
+	m.Id = x.Id
+	m.Owner = x.Owner
+	m.Repository = x.Repository
+	if t := x.CreateTime; t != nil {
+		m.CreateTime = t.AsTime()
+	}
 	return m, nil
 }

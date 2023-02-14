@@ -6,7 +6,7 @@ option go_package = "github.com/complex64/protoc-gen-go-firestore/cmd/protoc-gen
 message Item {
   option (firestore.message) = {
     enabled:true
-    collection:"parents/{id}/subparents/{id}/items"
+    collection:"parents/{id}/subparents/{id}/items/{id}"
   };
 
   string name = 1 [
