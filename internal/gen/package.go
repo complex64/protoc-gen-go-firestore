@@ -661,11 +661,17 @@ func (p *Package) genDocumentMethodSet(parent *tree.Parent[*Message], collection
 		GoImportPath: "context",
 	})
 
+	optType := p.out.QualifiedGoIdent(protogen.GoIdent{
+		GoName:       "SetOption",
+		GoImportPath: "cloud.google.com/go/firestore",
+	})
+
 	p.P(Comment(""),
 		"func (ref *", p.documentTypeName(parent, collection), ") ",
 		"Set(",
 		"ctx ", ctxType, ", ",
-		"msg *", msg.ProtoName(),
+		"msg *", msg.ProtoName(), ", ",
+		"opts ...", optType,
 		") ",
 		"error ",
 		" {")
@@ -675,7 +681,7 @@ func (p *Package) genDocumentMethodSet(parent *tree.Parent[*Message], collection
 	p.P("return err")
 	p.P("}")
 
-	p.P("if _, err := ref.doc.Set(ctx, fs); err != nil {")
+	p.P("if _, err := ref.doc.Set(ctx, fs, opts...); err != nil {")
 	p.P("return err")
 	p.P("}")
 
