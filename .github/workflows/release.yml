@@ -55,6 +55,8 @@ jobs:
           body: |
             Prepare release for ${{env.VERSION}}.
           token: ${{ steps.token.outputs.token }}
+          committer: complex64-release-bot[bot] <285308+complex64-release-bot[bot]@users.noreply.github.com>
+          author: complex64-release-bot[bot] <285308+complex64-release-bot[bot]@users.noreply.github.com>
 
   tag:
     runs-on: ubuntu-latest
