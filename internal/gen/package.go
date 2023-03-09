@@ -500,63 +500,6 @@ func (p *Package) genIteratorStop(parent *tree.Parent[*Message], collection stri
 	p.P()
 }
 
-func (p *Package) genCollectionMethodCreate(parent *tree.Parent[*Message], collection string, msg *Message) {
-	if msg == nil || msg.idField == nil {
-		return
-	}
-
-	ctxType := p.out.QualifiedGoIdent(protogen.GoIdent{
-		GoName:       "Context",
-		GoImportPath: "context",
-	})
-
-	resultType := p.out.QualifiedGoIdent(protogen.GoIdent{
-		GoName:       "WriteResult",
-		GoImportPath: "cloud.google.com/go/firestore",
-	})
-
-	statusErrType := p.out.QualifiedGoIdent(protogen.GoIdent{
-		GoName:       "Error",
-		GoImportPath: "google.golang.org/grpc/status",
-	})
-
-	codeType := p.out.QualifiedGoIdent(protogen.GoIdent{
-		GoName:       "InvalidArgument",
-		GoImportPath: "google.golang.org/grpc/codes",
-	})
-
-	collTypeName := p.collectionTypeName(parent, collection)
-
-	p.P(Comment(""),
-		"func (ref *", collTypeName, ") ",
-		"Create(",
-		"ctx ", ctxType, ", ",
-		"p *", msg.ProtoName(),
-		") (",
-		"*", resultType, ", ",
-		"error",
-		") {")
-	{
-		p.P("fs, err := p.ToFirestoreMap()")
-		p.P("if err != nil {")
-		p.P("return nil, err")
-		p.P("}")
-
-		p.P("id := fs.", msg.idField.Name())
-		p.P("if id == \"\" {")
-		p.P("return nil, ", statusErrType, "(", codeType, ", \"empty id\")")
-		p.P("}")
-
-		p.P("res, err := ref.coll.Doc(id).Create(ctx, fs)")
-		p.P("if err != nil {")
-		p.P("return nil, err")
-		p.P("}")
-		p.P("return res, nil")
-	}
-	p.P("}") // func
-	p.P()
-}
-
 func (p *Package) genQueryMethodFirst(parent *tree.Parent[*Message], collection string, msg *Message) {
 	if msg == nil {
 		return
