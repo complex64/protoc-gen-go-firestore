@@ -15,11 +15,6 @@ import (
 // FirestoreCollectionUsers is the Firestore collection name for documents of type utils.User.
 const FirestoreCollectionUsers = "users"
 
-// FirestoreUser is the Firestore Custom Object for utils.User.
-type FirestoreUser struct {
-	Name string `firestore:"name,omitempty"`
-}
-
 func FirestoreMapToUser(m map[string]any) (*User, error) {
 	bs, err := json.Marshal(m)
 	if err != nil {

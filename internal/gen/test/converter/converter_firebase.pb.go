@@ -11,36 +11,7 @@ import (
 	_ "github.com/complex64/protoc-gen-go-firestore/firestorepb"
 	protojson "google.golang.org/protobuf/encoding/protojson"
 	_ "google.golang.org/protobuf/types/known/timestamppb"
-	time "time"
 )
-
-// FirestoreCity is the Firestore Custom Object for converter.City.
-type FirestoreCity struct {
-	StringField            string                         `firestore:"stringField,omitempty"`
-	BoolField              bool                           `firestore:"boolField,omitempty"`
-	BytesField             []byte                         `firestore:"bytesField,omitempty"`
-	Int32Field             int32                          `firestore:"int32Field,omitempty"`
-	Int64Field             int64                          `firestore:"int64Field,omitempty"`
-	Uint32Field            uint32                         `firestore:"uint32Field,omitempty"`
-	Sint32Field            int32                          `firestore:"sint32Field,omitempty"`
-	Sint64Field            int64                          `firestore:"sint64Field,omitempty"`
-	FloatField             float32                        `firestore:"floatField,omitempty"`
-	DoubleField            float64                        `firestore:"doubleField,omitempty"`
-	TimestampField         time.Time                      `firestore:"timestampField,omitempty"`
-	RepeatedStringField    []string                       `firestore:"repeatedStringField,omitempty"`
-	RepeatedBoolField      []bool                         `firestore:"repeatedBoolField,omitempty"`
-	RepeatedBytesField     [][]byte                       `firestore:"repeatedBytesField,omitempty"`
-	RepeatedInt32Field     []int32                        `firestore:"repeatedInt32Field,omitempty"`
-	RepeatedInt64Field     []int64                        `firestore:"repeatedInt64Field,omitempty"`
-	RepeatedUint32Field    []uint32                       `firestore:"repeatedUint32Field,omitempty"`
-	RepeatedSint32Field    []int32                        `firestore:"repeatedSint32Field,omitempty"`
-	RepeatedSint64Field    []int64                        `firestore:"repeatedSint64Field,omitempty"`
-	RepeatedFloatField     []float32                      `firestore:"repeatedFloatField,omitempty"`
-	RepeatedDoubleField    []float64                      `firestore:"repeatedDoubleField,omitempty"`
-	RepeatedTimestampField []time.Time                    `firestore:"repeatedTimestampField,omitempty"`
-	Mayor                  *FirestoreMayor                `firestore:"mayor,omitempty"`
-	MyNestedField          *FirestoreCity_MyNestedMessage `firestore:"myNestedField,omitempty"`
-}
 
 func FirestoreMapToCity(m map[string]any) (*City, error) {
 	bs, err := json.Marshal(m)
@@ -64,11 +35,6 @@ func (x *City) ToFirestoreMap() (map[string]any, error) {
 		return nil, err
 	}
 	return m, nil
-}
-
-// FirestoreCity_MyNestedMessage is the Firestore Custom Object for converter.City_MyNestedMessage.
-type FirestoreCity_MyNestedMessage struct {
-	Name string `firestore:"name,omitempty"`
 }
 
 func FirestoreMapToCity_MyNestedMessage(m map[string]any) (*City_MyNestedMessage, error) {
@@ -95,12 +61,6 @@ func (x *City_MyNestedMessage) ToFirestoreMap() (map[string]any, error) {
 	return m, nil
 }
 
-// FirestoreMayor is the Firestore Custom Object for converter.Mayor.
-type FirestoreMayor struct {
-	Name    string            `firestore:"name,omitempty"`
-	Address *FirestoreAddress `firestore:"address,omitempty"`
-}
-
 func FirestoreMapToMayor(m map[string]any) (*Mayor, error) {
 	bs, err := json.Marshal(m)
 	if err != nil {
@@ -123,11 +83,6 @@ func (x *Mayor) ToFirestoreMap() (map[string]any, error) {
 		return nil, err
 	}
 	return m, nil
-}
-
-// FirestoreAddress is the Firestore Custom Object for converter.Address.
-type FirestoreAddress struct {
-	Value string `firestore:"value,omitempty"`
 }
 
 func FirestoreMapToAddress(m map[string]any) (*Address, error) {

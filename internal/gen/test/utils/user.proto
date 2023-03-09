@@ -8,7 +8,5 @@ message User {
     collection:"accounts/{id}/users/{id}"
   };
 
-  string name = 1 [
-    (firestore.field).id = true
-  ];
+  string name = 1;
 }

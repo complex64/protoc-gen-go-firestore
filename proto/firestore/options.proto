@@ -39,19 +39,4 @@ message MessageOptions {
 }
 
 message FieldOptions {
-  // Set an alternative name for the field.
-  string name = 1;
-
-  // Exclude the field from Firestore I/O.
-  bool ignore = 2;
-
-  // Mark the field as `serverTimestamp`.
-  // The field must be of type time.Time.
-  // `serverTimestamp` is a sentinel token that tells Firestore to substitute the server time into that field.
-  // When writing, if the field has the zero value, the server will populate the stored document with the time
-  // that the request is processed.
-  // However, if the field value is non-zero it won't be saved.
-  bool server_timestamp = 3;
-
-  bool id = 4;
 }

@@ -84,7 +84,6 @@ func (m *Message) initOpts() {
 	}
 }
 
-// Gen generates GORM models and supporting APIs.
 func (m *Message) Gen() {
 	log.Trace().
 		Str("file", m.file.proto.Desc.Path()).
@@ -96,7 +95,6 @@ func (m *Message) Gen() {
 	}
 
 	m.genCollectionNameConstant()
-	m.genCustomObjectStructType()
 	m.genConverterMethods()
 }
 
@@ -121,40 +119,12 @@ func (m *Message) leadingConstComment() protogen.Comments {
 	)
 }
 
-func (m *Message) genCustomObjectStructType() {
-	m.Annotate(m.CustomObjectName(), m.proto.Location) // Message/document type declaration.
-	m.P(m.leadingStructComment(), "type ", m.CustomObjectName(), " struct {")
-	m.genFields()
-	m.P("}")
-	m.P()
-}
-
-func (m *Message) leadingStructComment() protogen.Comments {
-	return appendDeprecationNotice(
-		Comment(" %s is the Firestore Custom Object for %s.%s.",
-			m.CustomObjectName(),
-			m.file.proto.GoPackageName,
-			m.proto.GoIdent.GoName),
-		m.deprecated(),
-	)
-}
-
 func (m *Message) deprecated() bool {
 	return m.proto.Desc.Options().(*descriptorpb.MessageOptions).GetDeprecated()
 }
 
-func (m *Message) genFields() {
-	for _, field := range m.fields {
-		field.Gen()
-	}
-}
-
 func (m *Message) ProtoName() string {
 	return m.proto.GoIdent.GoName
-}
-
-func (m *Message) CustomObjectName() string {
-	return fmt.Sprintf("Firestore%s", m.ProtoName())
 }
 
 func (m *Message) CollectionConstantName() string {

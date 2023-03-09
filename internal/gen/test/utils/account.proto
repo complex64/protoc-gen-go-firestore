@@ -16,16 +16,16 @@ message Account {
 message Manifest {
   option (firestore.message).collection = "installations/{owner}/repositories/{repository}/manifests/{manifest}";
 
-  string id = 1 [(firestore.field).id = true];
+  string id = 1;
   string owner = 2;
   string repository = 3;
-  google.protobuf.Timestamp create_time = 4 [(firestore.field).server_timestamp = true];
+  google.protobuf.Timestamp create_time = 4;
 }
 
 message Action {
   option (firestore.message).collection = "installations/{owner}/repositories/{repository}/manifests/{manifest}/actions/{action}";
 
-  string id = 1 [(firestore.field).id = true];
+  string id = 1;
   bytes proto = 2;
-  google.protobuf.Timestamp create_time = 3 [(firestore.field).server_timestamp = true];
+  google.protobuf.Timestamp create_time = 3;
 }

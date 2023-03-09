@@ -15,11 +15,6 @@ import (
 // FirestoreCollectionSessions is the Firestore collection name for documents of type utils.Session.
 const FirestoreCollectionSessions = "sessions"
 
-// FirestoreSession is the Firestore Custom Object for utils.Session.
-type FirestoreSession struct {
-	Uuid string `firestore:"uuid,omitempty"`
-}
-
 func FirestoreMapToSession(m map[string]any) (*Session, error) {
 	bs, err := json.Marshal(m)
 	if err != nil {

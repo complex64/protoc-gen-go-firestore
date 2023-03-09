@@ -15,11 +15,6 @@ import (
 // FirestoreCollectionItems is the Firestore collection name for documents of type unlinked.Item.
 const FirestoreCollectionItems = "items"
 
-// FirestoreItem is the Firestore Custom Object for unlinked.Item.
-type FirestoreItem struct {
-	Name string `firestore:"name,omitempty"`
-}
-
 func FirestoreMapToItem(m map[string]any) (*Item, error) {
 	bs, err := json.Marshal(m)
 	if err != nil {

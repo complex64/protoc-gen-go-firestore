@@ -1,10 +1,6 @@
 package gen
 
 import (
-	"fmt"
-	"strconv"
-	"strings"
-
 	"github.com/complex64/protoc-gen-go-firestore/firestorepb"
 	"google.golang.org/protobuf/compiler/protogen"
 	"google.golang.org/protobuf/proto"
@@ -54,38 +50,6 @@ func (f *Field) initTypes() error {
 	}
 	f.fieldType = fieldType
 	return nil
-}
-
-func (f *Field) Gen() {
-	name := f.proto.GoName
-	f.Annotate(f.msg.CustomObjectName()+"."+name, f.proto.Location)
-	f.P(name, " ", f.fieldType.String(), f.tags())
-}
-
-func (f *Field) tags() string {
-	if f.opts == nil {
-		return ""
-	}
-	vals := f.tagVals()
-	if len(vals) == 0 {
-		return ""
-	}
-
-	joined := strings.Join(vals, ",")
-	quoted := strconv.Quote(joined)
-	escaped := strings.Replace(quoted, "`", `\x60`, -1)
-	return fmt.Sprintf("`firestore:%s`", escaped)
-}
-
-func (f *Field) tagVals() (values []string) {
-	if f.opts.Ignore {
-		return []string{"-"}
-	}
-	if f.opts.ServerTimestamp {
-		return []string{f.FirestoreFieldName(), "serverTimestamp"}
-	}
-	values = append(values, f.FirestoreFieldName()+",omitempty")
-	return
 }
 
 func (f *Field) FirestoreFieldName() string {

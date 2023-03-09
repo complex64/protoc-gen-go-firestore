@@ -8,8 +8,4 @@ message Item {
     enabled:true
     collection:"parents/{id}/subparents/{id}/items/{id}"
   };
-
-  string name = 1 [
-    (firestore.field).id = true
-  ];
 }
