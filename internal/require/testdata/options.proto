@@ -4,7 +4,7 @@ import "google/protobuf/descriptor.proto";
 
 package testdata;
 
-option go_package = "github.com/complex64/protoc-gen-go-firestore/v2/internal/require/testdata;testdata";
+option go_package = "github.com/complex64/protoc-gen-go-firestore/v3/internal/require/testdata;testdata";
 
 extend google.protobuf.FileOptions {
   FileOptions file = 50000;

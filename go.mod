@@ -1,4 +1,4 @@
-module github.com/complex64/protoc-gen-go-firestore/v2
+module github.com/complex64/protoc-gen-go-firestore/v3
 
 go 1.19
 

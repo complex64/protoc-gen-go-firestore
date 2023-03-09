@@ -3,7 +3,7 @@ package require_test
 import (
 	"testing"
 
-	"github.com/complex64/protoc-gen-go-firestore/v2/internal/require"
+	"github.com/complex64/protoc-gen-go-firestore/v3/internal/require"
 )
 
 func TestFieldType(t *testing.T) {

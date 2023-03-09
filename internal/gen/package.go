@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"path"
 
-	"github.com/complex64/protoc-gen-go-firestore/v2/internal/gen/tree"
-	"github.com/complex64/protoc-gen-go-firestore/v2/internal/version"
+	"github.com/complex64/protoc-gen-go-firestore/v3/internal/gen/tree"
+	"github.com/complex64/protoc-gen-go-firestore/v3/internal/version"
 	"google.golang.org/protobuf/compiler/protogen"
 )
 

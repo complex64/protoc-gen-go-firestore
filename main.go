@@ -6,8 +6,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/complex64/protoc-gen-go-firestore/v2/internal/gen"
-	"github.com/complex64/protoc-gen-go-firestore/v2/internal/version"
+	"github.com/complex64/protoc-gen-go-firestore/v3/internal/gen"
+	"github.com/complex64/protoc-gen-go-firestore/v3/internal/version"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"google.golang.org/protobuf/compiler/protogen"

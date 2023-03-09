@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/complex64/protoc-gen-go-firestore/v2/internal/gen/test/converter"
+	"github.com/complex64/protoc-gen-go-firestore/v3/internal/gen/test/converter"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
