@@ -20,16 +20,11 @@ func NewField(msg *Message, proto *protogen.Field) (*Field, error) {
 type Field struct {
 	msg   *Message
 	proto *protogen.Field
-
-	opts      *firestorepb.FieldOptions
-	fieldType *FieldType
+	opts  *firestorepb.FieldOptions
 }
 
 func (f *Field) init() error {
 	f.initOpts()
-	if err := f.initTypes(); err != nil {
-		return err
-	}
 	return nil
 }
 
@@ -41,15 +36,6 @@ func (f *Field) initOpts() {
 	} else {
 		f.opts = &firestorepb.FieldOptions{}
 	}
-}
-
-func (f *Field) initTypes() error {
-	fieldType, err := NewFieldType(f)
-	if err != nil {
-		return err
-	}
-	f.fieldType = fieldType
-	return nil
 }
 
 func (f *Field) FirestoreFieldName() string {
