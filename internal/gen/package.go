@@ -122,7 +122,7 @@ func (p *Package) P(v ...interface{}) { p.out.P(v...) }
 func (p *Package) genCollectionChainMethods() {
 	p.tree.Walk(func(parent *tree.Parent[*Message], collection string, msg *Message) {
 		p.genCollectionMethod(parent, collection, msg)
-		p.genCollectionMethodCreate(parent, collection, msg)
+		// p.genCollectionMethodCreate(parent, collection, msg)
 		p.genCollectionMethodLimit(parent, collection, msg)
 		p.genCollectionMethodOrderBy(parent, collection, msg)
 		p.genCollectionMethodWhere(parent, collection)
@@ -421,15 +421,15 @@ func (p *Package) genIteratorGetAll(parent *tree.Parent[*Message], collection st
 
 	p.P("for j, snapshot := range snaps {")
 	{
-		p.P("o := new(", msg.CustomObjectName(), ")")
-		p.P("if err := snapshot.DataTo(o); err != nil {")
+		p.P("m := map[string]any{}")
+		p.P("if err := snapshot.DataTo(m); err != nil {")
 		p.P("return nil, err")
 		p.P("}")
 
-		p.P("if p, err := o.ToProto(); err != nil {")
+		p.P("if proto, err := FirestoreMapTo", msg.ProtoName(), "(m); err != nil {")
 		p.P("return nil, err")
 		p.P("} else {")
-		p.P("protos[j] = p")
+		p.P("protos[j] = proto")
 		p.P("}")
 	}
 	p.P("}")
@@ -468,12 +468,12 @@ func (p *Package) genIteratorNext(parent *tree.Parent[*Message], collection stri
 	p.P("return nil, err")
 	p.P("}")
 
-	p.P("obj := new(", msg.CustomObjectName(), ")")
-	p.P("if err := snapshot.DataTo(obj); err != nil {")
+	p.P("m := map[string]any{}")
+	p.P("if err := snapshot.DataTo(m); err != nil {")
 	p.P("return nil, err")
 	p.P("}")
 
-	p.P("if p, err := obj.ToProto(); err != nil {")
+	p.P("if p, err := FirestoreMapTo", msg.ProtoName(), "(m); err != nil {")
 	p.P("return nil, err")
 	p.P("} else {")
 	p.P("return p, nil")
@@ -537,7 +537,7 @@ func (p *Package) genCollectionMethodCreate(parent *tree.Parent[*Message], colle
 		"error",
 		") {")
 	{
-		p.P("fs, err := p.ToFirestore()")
+		p.P("fs, err := p.ToFirestoreMap()")
 		p.P("if err != nil {")
 		p.P("return nil, err")
 		p.P("}")
@@ -596,12 +596,12 @@ func (p *Package) genQueryMethodFirst(parent *tree.Parent[*Message], collection 
 	p.P("return nil, err")
 	p.P("}")
 
-	p.P("obj := new(", msg.CustomObjectName(), ")")
-	p.P("if err := snapshot.DataTo(obj); err != nil {")
+	p.P("m := map[string]any{}")
+	p.P("if err := snapshot.DataTo(m); err != nil {")
 	p.P("return nil, err")
 	p.P("}")
 
-	p.P("if proto, err := obj.ToProto(); err != nil {")
+	p.P("if proto, err := FirestoreMapTo", msg.ProtoName(), "(m); err != nil {")
 	p.P("return nil, err")
 	p.P("} else {")
 	p.P("return proto, nil")
@@ -635,12 +635,12 @@ func (p *Package) genDocumentMethodGet(parent *tree.Parent[*Message], collection
 		p.P("return nil, err")
 		p.P("}")
 
-		p.P("obj := new(", msg.CustomObjectName(), ")")
-		p.P("if err := snapshot.DataTo(obj); err != nil {")
+		p.P("m := map[string]any{}")
+		p.P("if err := snapshot.DataTo(m); err != nil {")
 		p.P("return nil, err")
 		p.P("}")
 
-		p.P("if proto, err := obj.ToProto(); err != nil {")
+		p.P("if proto, err := FirestoreMapTo", msg.ProtoName(), "(m); err != nil {")
 		p.P("return nil, err")
 		p.P("} else {")
 		p.P("return proto, nil")
@@ -676,7 +676,7 @@ func (p *Package) genDocumentMethodSet(parent *tree.Parent[*Message], collection
 		"error ",
 		" {")
 
-	p.P("fs, err := msg.ToFirestore()")
+	p.P("fs, err := msg.ToFirestoreMap()")
 	p.P("if err != nil {")
 	p.P("return err")
 	p.P("}")
