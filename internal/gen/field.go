@@ -38,13 +38,6 @@ func (f *Field) initOpts() {
 	}
 }
 
-func (f *Field) FirestoreFieldName() string {
-	if f.opts.Name != "" {
-		return f.opts.Name
-	}
-	return f.proto.Desc.JSONName()
-}
-
 func (f *Field) Name() string {
 	return f.proto.GoName
 }

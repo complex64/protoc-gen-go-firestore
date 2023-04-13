@@ -30,8 +30,6 @@ type Message struct {
 
 	opts   *firestorepb.MessageOptions
 	fields []*Field
-
-	idField *Field
 }
 
 func (m *Message) init() error {
@@ -59,13 +57,6 @@ func (m *Message) initField(proto *protogen.Field) error {
 	field, err := NewField(m, proto)
 	if err != nil {
 		return err
-	}
-
-	if field.opts.Id {
-		if m.idField != nil {
-			panic("duplicate id field")
-		}
-		m.idField = field
 	}
 
 	m.fields = append(m.fields, field)

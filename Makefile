@@ -3,7 +3,7 @@ build:
 	go build ./...
 
 # Run all tests.
-t :test
+t: test
 test:
 	go test ./...
 
