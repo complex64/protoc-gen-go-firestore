@@ -7,7 +7,7 @@ require (
 	github.com/complex64/protoc-gen-go-firestore/firestorepb v0.0.0-20230403093733-eec91568b73d
 	github.com/google/go-cmp v0.5.9
 	github.com/rs/zerolog v1.29.1
-	github.com/stretchr/testify v1.8.2
+	github.com/stretchr/testify v1.8.3
 	golang.org/x/text v0.9.0
 	google.golang.org/api v0.122.0
 	google.golang.org/protobuf v1.30.0
