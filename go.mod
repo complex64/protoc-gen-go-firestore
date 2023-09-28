@@ -8,7 +8,7 @@ require (
 	github.com/google/go-cmp v0.5.9
 	github.com/rs/zerolog v1.29.1
 	github.com/stretchr/testify v1.8.4
-	golang.org/x/text v0.10.0
+	golang.org/x/text v0.13.0
 	google.golang.org/api v0.128.0
 	google.golang.org/protobuf v1.31.0
 )
