@@ -3,7 +3,7 @@ module github.com/complex64/protoc-gen-go-firestore/v3
 go 1.19
 
 require (
-	cloud.google.com/go/firestore v1.13.0
+	cloud.google.com/go/firestore v1.14.0
 	github.com/complex64/protoc-gen-go-firestore/firestorepb v0.0.0-20230403093733-eec91568b73d
 	github.com/google/go-cmp v0.6.0
 	github.com/rs/zerolog v1.31.0
