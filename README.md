@@ -1,8 +1,12 @@
 # protoc-gen-go-firestore
 
-[![Tests](https://github.com/complex64/protoc-gen-go-firestore/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/complex64/protoc-gen-go-firestore/actions/workflows/tests.yml) [![Linters](https://github.com/complex64/protoc-gen-go-firestore/actions/workflows/linters.yml/badge.svg?branch=main)](https://github.com/complex64/protoc-gen-go-firestore/actions/workflows/linters.yml) [![Go Report Card](https://goreportcard.com/badge/github.com/complex64/protoc-gen-go-firestore)](https://goreportcard.com/report/github.com/complex64/protoc-gen-go-firestore) [![Maintainability](https://api.codeclimate.com/v1/badges/69739915a43041e34892/maintainability)](https://codeclimate.com/github/complex64/protoc-gen-go-firestore/maintainability) [![Go Reference](https://pkg.go.dev/badge/github.com/complex64/protoc-gen-go-firestore.svg)](https://pkg.go.dev/github.com/complex64/protoc-gen-go-firestore)
+[![Tests](https://github.com/complex64/protoc-gen-go-firestore/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/complex64/protoc-gen-go-firestore/actions/workflows/tests.yml)
+[![Linters](https://github.com/complex64/protoc-gen-go-firestore/actions/workflows/linters.yml/badge.svg?branch=main)](https://github.com/complex64/protoc-gen-go-firestore/actions/workflows/linters.yml)
+[![Go Report Card](https://goreportcard.com/badge/github.com/complex64/protoc-gen-go-firestore)](https://goreportcard.com/report/github.com/complex64/protoc-gen-go-firestore)
+[![Maintainability](https://api.codeclimate.com/v1/badges/69739915a43041e34892/maintainability)](https://codeclimate.com/github/complex64/protoc-gen-go-firestore/maintainability)
+[![Go Reference](https://pkg.go.dev/badge/github.com/complex64/protoc-gen-go-firestore.svg)](https://pkg.go.dev/github.com/complex64/protoc-gen-go-firestore)
 
-Exploration into generating Firestore bindings for Go from your .proto files.
+Generate Google Firestore bindings for Go from your .proto files.
 
 ## Example
 
